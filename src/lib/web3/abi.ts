@@ -1,4 +1,4 @@
-import type { Abi } from 'viem'
+import type { Abi } from 'viem';
 
 export const AAVE_SUPPLY_MINIMAL_ABI = [
   {
@@ -13,7 +13,7 @@ export const AAVE_SUPPLY_MINIMAL_ABI = [
     ],
     outputs: [],
   },
-] as const satisfies Abi
+] as const satisfies Abi;
 
 export const AAVE_SUPPLY_DETAILED_ABI = [
   {
@@ -44,4 +44,4 @@ export const AAVE_SUPPLY_DETAILED_ABI = [
     stateMutability: 'nonpayable',
     type: 'function',
   },
-] as const satisfies Abi
+] as const satisfies Abi;

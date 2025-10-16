@@ -1,18 +1,14 @@
-import type { Metadata } from 'next'
-import '../src/css/globals.css'
-import Web3ProviderWrapper from '@/components/Web3ProviderWrapper'
-import Header from '@/components/common/header'
+import type { Metadata } from 'next';
+import '../src/css/globals.css';
+import Header from '@/components/common/header';
+import Web3ProviderWrapper from '@/components/Web3ProviderWrapper';
 
 export const metadata: Metadata = {
   title: 'CrossDonate',
   description: 'CrossDonate Frontend',
-}
+};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body suppressHydrationWarning={true}>
@@ -24,5 +20,5 @@ export default function RootLayout({
         </Web3ProviderWrapper>
       </body>
     </html>
-  )
+  );
 }

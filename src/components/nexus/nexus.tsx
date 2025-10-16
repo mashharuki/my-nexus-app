@@ -1,13 +1,13 @@
-'use client'
+'use client';
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { useAccount } from 'wagmi'
-import { useWeb3Context } from '@/providers/Web3Provider'
+import { useAccount } from 'wagmi';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { useWeb3Context } from '@/providers/Web3Provider';
 
 const Nexus = () => {
-  const { isConnected } = useAccount()
-  const { network } = useWeb3Context()
+  const { isConnected } = useAccount();
+  const { network } = useWeb3Context();
 
   return (
     <Card className="border-none shadow-none">
@@ -19,47 +19,31 @@ const Nexus = () => {
               Network: {network} | Wallet: {isConnected ? 'Connected' : 'Not Connected'}
             </p>
           </div>
-          
+
           <div className="w-full flex items-center gap-x-4">
             <div className="bg-card rounded-lg border border-gray-400 p-6 shadow-sm text-center w-1/2">
               <h3 className="text-lg font-semibold mb-4">Bridge Tokens</h3>
-              <Button
-                disabled={!isConnected}
-                className="w-full font-bold rounded-lg"
-              >
+              <Button disabled={!isConnected} className="w-full font-bold rounded-lg">
                 {isConnected ? 'Bridge Tokens' : 'Connect Wallet First'}
               </Button>
             </div>
             <div className="bg-card rounded-lg border border-gray-400 p-6 shadow-sm text-center w-1/2">
               <h3 className="text-lg font-semibold mb-4">Transfer Tokens</h3>
-              <Button
-                disabled={!isConnected}
-                className="w-full font-bold rounded-lg"
-              >
+              <Button disabled={!isConnected} className="w-full font-bold rounded-lg">
                 {isConnected ? 'Transfer Tokens' : 'Connect Wallet First'}
               </Button>
             </div>
           </div>
           <div className="w-full flex items-center gap-x-4">
             <div className="bg-card rounded-lg border border-gray-400 p-6 shadow-sm text-center w-3/4">
-              <h3 className="text-lg font-semibold mb-4">
-                Bridge & Supply USDT on AAVE
-              </h3>
-              <Button
-                disabled={!isConnected}
-                className="w-full font-bold rounded-lg"
-              >
+              <h3 className="text-lg font-semibold mb-4">Bridge & Supply USDT on AAVE</h3>
+              <Button disabled={!isConnected} className="w-full font-bold rounded-lg">
                 {isConnected ? 'Bridge & Supply USDT' : 'Connect Wallet First'}
               </Button>
             </div>
             <div className="bg-card rounded-lg border border-gray-400 p-6 shadow-sm text-center w-3/4">
-              <h3 className="text-lg font-semibold mb-4">
-                Bridge & Supply USDC on AAVE
-              </h3>
-              <Button
-                disabled={!isConnected}
-                className="w-full font-bold rounded-lg"
-              >
+              <h3 className="text-lg font-semibold mb-4">Bridge & Supply USDC on AAVE</h3>
+              <Button disabled={!isConnected} className="w-full font-bold rounded-lg">
                 {isConnected ? 'Bridge & Supply USDC' : 'Connect Wallet First'}
               </Button>
             </div>
@@ -67,7 +51,7 @@ const Nexus = () => {
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default Nexus
+export default Nexus;

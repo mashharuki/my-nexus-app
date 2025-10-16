@@ -1,23 +1,63 @@
-import { useState, useEffect } from 'react'
-import { useAccount, useWalletClient, useBalance } from 'wagmi'
 // Nexus SDKのインポート
-import { NexusSDK } from '@avail-project/nexus-core'
+import { NexusSDK } from '@avail-project/nexus-core';
+import { useEffect, useState } from 'react';
+import { useAccount, useBalance, useWalletClient } from 'wagmi';
 
 interface TokenBalance {
-  chain: string
-  token: string
-  balance: string
-  symbol: string
-  decimals: number
-  usdValue?: number
-  chainId?: number
-  contractAddress?: string
-  rawBalance?: string
+  chain: string;
+  token: string;
+  balance: string;
+  symbol: string;
+  decimals: number;
+  usdValue?: number;
+  chainId?: number;
+  contractAddress?: string;
+  rawBalance?: string;
 }
 
 interface UnifiedBalance {
-  totalUSD: number
-  balances: TokenBalance[]
+  totalUSD: number;
+  balances: TokenBalance[];
+}
+
+// Nexus SDK用の型定義
+interface EthereumProvider {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+  on: (event: string, callback: (...args: unknown[]) => void) => EthereumProvider;
+  removeListener: (event: string, callback: (...args: unknown[]) => void) => EthereumProvider;
+  [key: string]: unknown;
+}
+
+interface NexusBalance {
+  symbol: string;
+  balance: string;
+  balanceInFiat?: number;
+  abstracted?: boolean;
+  chain?: string;
+  chainId?: string | number;
+  decimals?: number;
+  chainName?: string;
+  network?: string;
+  token?: string;
+  amount?: string;
+  formattedBalance?: string;
+  usdValue?: number;
+  value?: number;
+  priceUSD?: number;
+  contractAddress?: string;
+  rawBalance?: string;
+  breakdown?: Array<{
+    chain: string | { id: number; name: string; chainId?: number; network?: string };
+    balance: string;
+    chainId?: string | number;
+    chainName?: string;
+    network?: string;
+    balanceInFiat?: number;
+    usdValue?: number;
+    symbol?: string;
+    contractAddress?: string;
+    rawBalance?: string;
+  }>;
 }
 
 // Nexus SDKのインスタンスを作成
@@ -25,13 +65,13 @@ const nexusSDK = new NexusSDK({
   // テストネット設定
   network: 'testnet',
   // デバッグモードを有効化
-  debug: true
-})
+  debug: true,
+});
 
 // チェーン名のマッピング関数
 const getChainName = (chainId: number | string | undefined) => {
-  if (!chainId) return 'Unknown'
-  
+  if (!chainId) return 'Unknown';
+
   const chainMap: Record<number | string, string> = {
     1: 'Ethereum',
     11155111: 'Sepolia',
@@ -42,105 +82,106 @@ const getChainName = (chainId: number | string | undefined) => {
     10: 'Optimism',
     11155420: 'Optimism Sepolia',
     137: 'Polygon',
-    80002: 'Polygon Amoy'
-  }
-  return chainMap[chainId] || `Chain ${chainId}`
-}
+    80002: 'Polygon Amoy',
+  };
+  return chainMap[chainId] || `Chain ${chainId}`;
+};
 
 export const useNexusBalance = () => {
-  const { address, isConnected, chainId } = useAccount()
-  const { data: walletClient } = useWalletClient()
-  const [unifiedBalance, setUnifiedBalance] = useState<UnifiedBalance | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [nexusInitialized, setNexusInitialized] = useState(false)
-  const [lastConnectedAddress, setLastConnectedAddress] = useState<string | null>(null)
-  const [walletClientReady, setWalletClientReady] = useState(false)
-  
+  const { address, isConnected, chainId } = useAccount();
+  const { data: walletClient } = useWalletClient();
+  const [unifiedBalance, setUnifiedBalance] = useState<UnifiedBalance | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [nexusInitialized, setNexusInitialized] = useState(false);
+  const [lastConnectedAddress, setLastConnectedAddress] = useState<string | null>(null);
+  const [walletClientReady, setWalletClientReady] = useState(false);
+
   // 現在のチェーンの残高を取得
   const { data: currentChainBalance } = useBalance({
     address: address,
-    chainId: chainId
-  })
+    chainId: chainId,
+  });
 
   const fetchUnifiedBalance = async () => {
     console.log('fetchUnifiedBalance called with:', {
       isConnected,
       address,
       walletClient: !!walletClient,
-      chainId
-    })
-    
+      chainId,
+    });
+
     if (!isConnected || !address) {
-      setUnifiedBalance(null)
-      setError('Please connect your wallet first')
-      setLoading(false)
-      return
-    }
-    
-    if (!walletClient) {
-      setUnifiedBalance(null)
-      setError('Wallet client is not ready yet. Please wait a moment and try again.')
-      setLoading(false)
-      return
+      setUnifiedBalance(null);
+      setError('Please connect your wallet first');
+      setLoading(false);
+      return;
     }
 
-    setLoading(true)
-    setError(null)
+    if (!walletClient) {
+      setUnifiedBalance(null);
+      setError('Wallet client is not ready yet. Please wait a moment and try again.');
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
 
     try {
-      console.log('Fetching unified balance for address:', address)
-      
+      console.log('Fetching unified balance for address:', address);
+
       // アドレスが変更された場合、Nexus SDKを再初期化
-      const shouldReinitialize = !nexusInitialized || lastConnectedAddress !== address
-      
+      const shouldReinitialize = !nexusInitialized || lastConnectedAddress !== address;
+
       if (shouldReinitialize) {
-        console.log('Initializing Nexus SDK with wallet client...')
-        
+        console.log('Initializing Nexus SDK with wallet client...');
+
         // WalletClientをEthereumProvider形式に変換
-        const ethereumProvider = {
+        const ethereumProvider: EthereumProvider = {
           ...walletClient,
-          on: (event: string, _callback: (...args: any[]) => void) => {
+          request: walletClient.request.bind(walletClient) as EthereumProvider['request'],
+          on: (event: string, _callback: (...args: unknown[]) => void) => {
             // イベントリスナーの実装（必要に応じて）
-            console.log('Event listener added:', event)
-            return ethereumProvider
+            console.log('Event listener added:', event);
+            return ethereumProvider;
           },
-          removeListener: (event: string, _callback: (...args: any[]) => void) => {
+          removeListener: (event: string, _callback: (...args: unknown[]) => void) => {
             // イベントリスナーの削除（必要に応じて）
-            console.log('Event listener removed:', event)
-            return ethereumProvider
-          }
-        } as any
-        
-        await nexusSDK.initialize(ethereumProvider)
-        setNexusInitialized(true)
-        setLastConnectedAddress(address)
-        console.log('Nexus SDK initialized successfully for address:', address)
+            console.log('Event listener removed:', event);
+            return ethereumProvider;
+          },
+        };
+
+        await nexusSDK.initialize(ethereumProvider);
+        setNexusInitialized(true);
+        setLastConnectedAddress(address);
+        console.log('Nexus SDK initialized successfully for address:', address);
       }
-      
+
       // Nexus SDKを使用して実際の残高を取得
       // 複数のメソッドを試行して最適なデータを取得
-      let balances: any = null
-      
+      let balances: NexusBalance[] | null = null;
+
       try {
         // メソッド1: getUnifiedBalances() - 統合された残高
-        balances = await nexusSDK.getUnifiedBalances()
-        console.log('Nexus SDK getUnifiedBalances response:', balances)
-        console.log('Detailed analysis of each balance entry:')
-        balances.forEach((balance: any, index: number) => {
+        balances = await nexusSDK.getUnifiedBalances();
+        console.log('Nexus SDK getUnifiedBalances response:', balances);
+        console.log('Detailed analysis of each balance entry:');
+        balances.forEach((balance: NexusBalance, index: number) => {
           console.log(`Balance ${index + 1}:`, {
             symbol: balance.symbol,
             balance: balance.balance,
             balanceInFiat: balance.balanceInFiat,
             abstracted: balance.abstracted,
             breakdown: balance.breakdown,
-            allKeys: Object.keys(balance)
-          })
-          
+            allKeys: Object.keys(balance),
+          });
+
           // breakdown配列の詳細を確認
           if (balance.breakdown && Array.isArray(balance.breakdown)) {
-            console.log(`Breakdown for ${balance.symbol}:`, balance.breakdown)
-            balance.breakdown.forEach((item: any, breakdownIndex: number) => {
+            console.log(`Breakdown for ${balance.symbol}:`, balance.breakdown);
+            balance.breakdown.forEach((item, breakdownIndex: number) => {
               console.log(`  Breakdown ${breakdownIndex + 1}:`, {
                 chain: item.chain,
                 chainId: item.chainId,
@@ -148,9 +189,9 @@ export const useNexusBalance = () => {
                 network: item.network,
                 balance: item.balance,
                 symbol: item.symbol,
-                allKeys: Object.keys(item)
-              })
-              
+                allKeys: Object.keys(item),
+              });
+
               // chainオブジェクトの詳細を確認
               if (item.chain && typeof item.chain === 'object') {
                 console.log(`    Chain object details:`, {
@@ -158,57 +199,68 @@ export const useNexusBalance = () => {
                   name: item.chain.name,
                   id: item.chain.id,
                   network: item.chain.network,
-                  allKeys: Object.keys(item.chain)
-                })
+                  allKeys: Object.keys(item.chain),
+                });
               }
-            })
+            });
           }
-        })
-        
-        
+        });
       } catch (unifiedError) {
-        console.error('getUnifiedBalances failed:', unifiedError)
-        throw unifiedError
+        console.error('getUnifiedBalances failed:', unifiedError);
+        throw unifiedError;
       }
-      
+
       // Nexus SDKのレスポンスを処理
       // UserAsset[]形式のレスポンスを処理
       if (balances && Array.isArray(balances) && balances.length > 0) {
-        console.log('Raw balances from Nexus SDK:', balances)
-        
+        console.log('Raw balances from Nexus SDK:', balances);
+
         // breakdown配列から個別のチェーン別の残高を展開
-        const processedBalances: TokenBalance[] = []
-        
-        balances.forEach((asset: any) => {
-          console.log('Processing asset:', asset.symbol)
-          
+        const processedBalances: TokenBalance[] = [];
+
+        balances.forEach((asset: NexusBalance) => {
+          console.log('Processing asset:', asset.symbol);
+
           // breakdown配列がある場合は、各チェーンの残高を個別に処理
           if (asset.breakdown && Array.isArray(asset.breakdown)) {
-            asset.breakdown.forEach((breakdownItem: any) => {
+            asset.breakdown.forEach((breakdownItem) => {
               if (parseFloat(breakdownItem.balance) > 0) {
-                const chainInfo = breakdownItem.chain
-                const chainId = chainInfo?.id || breakdownItem.chainId
-                const chainName = chainInfo?.name || breakdownItem.chainName || getChainName(chainId)
-                
+                const chainInfo = breakdownItem.chain;
+                const chainId =
+                  (typeof chainInfo === 'object' ? chainInfo?.id : undefined) ||
+                  breakdownItem.chainId;
+                const chainName =
+                  (typeof chainInfo === 'object' ? chainInfo?.name : chainInfo) ||
+                  breakdownItem.chainName ||
+                  getChainName(chainId);
+
                 processedBalances.push({
                   chain: chainName,
                   token: asset.symbol,
                   balance: breakdownItem.balance,
                   symbol: asset.symbol,
                   decimals: asset.decimals || 18,
-                  usdValue: asset.balanceInFiat ? (parseFloat(breakdownItem.balance) / parseFloat(asset.balance)) * asset.balanceInFiat : 0,
-                  chainId: chainId,
+                  usdValue: asset.balanceInFiat
+                    ? (parseFloat(breakdownItem.balance) / parseFloat(asset.balance)) *
+                      asset.balanceInFiat
+                    : 0,
+                  chainId: typeof chainId === 'string' ? parseInt(chainId, 10) : chainId,
                   contractAddress: breakdownItem.contractAddress,
-                  rawBalance: breakdownItem.rawBalance
-                })
+                  rawBalance: breakdownItem.rawBalance,
+                });
               }
-            })
+            });
           } else {
             // breakdown配列がない場合は、統合された残高を処理
-            const chainId = asset.chainId ? parseInt(asset.chainId.toString()) : undefined
-            
+            const chainId = asset.chainId ? parseInt(asset.chainId.toString(), 10) : undefined;
+
             processedBalances.push({
-              chain: asset.chainName || asset.chain || asset.network || getChainName(chainId) || 'Unknown',
+              chain:
+                asset.chainName ||
+                asset.chain ||
+                asset.network ||
+                getChainName(chainId) ||
+                'Unknown',
               token: asset.symbol || asset.token || 'Unknown',
               balance: asset.balance || asset.amount || asset.formattedBalance || '0',
               symbol: asset.symbol || 'Unknown',
@@ -216,33 +268,33 @@ export const useNexusBalance = () => {
               usdValue: asset.usdValue || asset.value || asset.priceUSD || asset.balanceInFiat || 0,
               chainId: chainId,
               contractAddress: asset.contractAddress,
-              rawBalance: asset.rawBalance
-            })
+              rawBalance: asset.rawBalance,
+            });
           }
-        })
-        
+        });
+
         // 総USD価値を計算
         const totalUSD = processedBalances.reduce((sum, balance) => {
-          return sum + (balance.usdValue || 0)
-        }, 0)
-        
+          return sum + (balance.usdValue || 0);
+        }, 0);
+
         // 現在のチェーンの残高を追加（重複を避けるため、Nexus SDKに含まれていない場合のみ）
         if (currentChainBalance && chainId) {
           console.log('Checking current chain balance:', {
             chainId,
             symbol: currentChainBalance.symbol,
             balance: currentChainBalance.formatted,
-            chainName: getChainName(chainId)
-          })
-          
+            chainName: getChainName(chainId),
+          });
+
           // 現在のチェーンの残高が既にNexus SDKの結果に含まれているかチェック
-          const existingEntry = processedBalances.find(b => 
-            b.chainId === chainId && b.symbol === currentChainBalance.symbol
-          )
-          
+          const existingEntry = processedBalances.find(
+            (b) => b.chainId === chainId && b.symbol === currentChainBalance.symbol
+          );
+
           if (!existingEntry) {
             // Nexus SDKに含まれていない場合のみ追加
-            const currentChainName = getChainName(chainId)
+            const currentChainName = getChainName(chainId);
             const currentChainBalanceEntry: TokenBalance = {
               chain: currentChainName,
               token: currentChainBalance.symbol,
@@ -252,52 +304,52 @@ export const useNexusBalance = () => {
               usdValue: 0, // USD価値は計算しない
               chainId: chainId,
               contractAddress: undefined,
-              rawBalance: currentChainBalance.value.toString()
-            }
-            
-            processedBalances.push(currentChainBalanceEntry)
-            console.log('Added current chain balance to list (not found in Nexus SDK)')
+              rawBalance: currentChainBalance.value.toString(),
+            };
+
+            processedBalances.push(currentChainBalanceEntry);
+            console.log('Added current chain balance to list (not found in Nexus SDK)');
           } else {
-            console.log('Current chain balance already exists in Nexus SDK results')
+            console.log('Current chain balance already exists in Nexus SDK results');
           }
         } else {
           console.log('No current chain balance to add:', {
             currentChainBalance: !!currentChainBalance,
-            chainId
-          })
+            chainId,
+          });
         }
-        
+
         const unifiedBalanceData: UnifiedBalance = {
           totalUSD,
-          balances: processedBalances
-        }
-        
-        setUnifiedBalance(unifiedBalanceData)
+          balances: processedBalances,
+        };
+
+        setUnifiedBalance(unifiedBalanceData);
       } else {
         // 残高が見つからない場合のフォールバック
         setUnifiedBalance({
           totalUSD: 0,
-          balances: []
-        })
+          balances: [],
+        });
       }
     } catch (err) {
-      console.error('Nexus SDK error:', err)
-      
+      console.error('Nexus SDK error:', err);
+
       // エラーの詳細を確認
-      let errorMessage = 'Nexus SDK temporarily unavailable, showing demo data'
+      let errorMessage = 'Nexus SDK temporarily unavailable, showing demo data';
       if (err instanceof Error) {
         if (err.message.includes('timeout')) {
-          errorMessage = 'Nexus SDK API timeout, showing demo data'
+          errorMessage = 'Nexus SDK API timeout, showing demo data';
         } else if (err.message.includes('Failed to fetch')) {
-          errorMessage = 'Network error - Nexus SDK API unavailable, showing demo data'
+          errorMessage = 'Network error - Nexus SDK API unavailable, showing demo data';
         } else {
-          errorMessage = `Nexus SDK error: ${err.message}, showing demo data`
+          errorMessage = `Nexus SDK error: ${err.message}, showing demo data`;
         }
       }
-      
+
       // Nexus SDKが利用できない場合のフォールバック（モックデータ）
-      console.log('Falling back to mock data due to SDK error')
-      
+      console.log('Falling back to mock data due to SDK error');
+
       const mockBalance: UnifiedBalance = {
         totalUSD: 1250.75,
         balances: [
@@ -307,7 +359,7 @@ export const useNexusBalance = () => {
             balance: '0.5',
             symbol: 'ETH',
             decimals: 18,
-            usdValue: 1000
+            usdValue: 1000,
           },
           {
             chain: 'Ethereum',
@@ -315,7 +367,7 @@ export const useNexusBalance = () => {
             balance: '1000',
             symbol: 'USDC',
             decimals: 6,
-            usdValue: 1000
+            usdValue: 1000,
           },
           {
             chain: 'Base',
@@ -323,7 +375,7 @@ export const useNexusBalance = () => {
             balance: '0.1',
             symbol: 'ETH',
             decimals: 18,
-            usdValue: 200
+            usdValue: 200,
           },
           {
             chain: 'Arbitrum',
@@ -331,7 +383,7 @@ export const useNexusBalance = () => {
             balance: '500',
             symbol: 'USDT',
             decimals: 6,
-            usdValue: 500
+            usdValue: 500,
           },
           {
             chain: 'Polygon',
@@ -339,46 +391,50 @@ export const useNexusBalance = () => {
             balance: '100',
             symbol: 'MATIC',
             decimals: 18,
-            usdValue: 50.75
-          }
-        ]
-      }
-      
-      setUnifiedBalance(mockBalance)
-      setError(errorMessage)
+            usdValue: 50.75,
+          },
+        ],
+      };
+
+      setUnifiedBalance(mockBalance);
+      setError(errorMessage);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // walletClientの準備状況を監視
   useEffect(() => {
     if (walletClient && isConnected && address) {
-      console.log('Wallet client is ready')
-      setWalletClientReady(true)
+      console.log('Wallet client is ready');
+      setWalletClientReady(true);
     } else {
-      console.log('Wallet client not ready:', { walletClient: !!walletClient, isConnected, address })
-      setWalletClientReady(false)
+      console.log('Wallet client not ready:', {
+        walletClient: !!walletClient,
+        isConnected,
+        address,
+      });
+      setWalletClientReady(false);
     }
-  }, [walletClient, isConnected, address])
+  }, [walletClient, isConnected, address]);
 
   // ウォレット接続状態の変化を監視
   useEffect(() => {
     if (!isConnected || !address) {
       // ウォレットが切断された場合、状態をリセット
-      setUnifiedBalance(null)
-      setError(null)
-      setNexusInitialized(false)
-      setLastConnectedAddress(null)
-      setWalletClientReady(false)
+      setUnifiedBalance(null);
+      setError(null);
+      setNexusInitialized(false);
+      setLastConnectedAddress(null);
+      setWalletClientReady(false);
     }
-  }, [isConnected, address])
+  }, [isConnected, address]);
 
   return {
     unifiedBalance,
     loading,
     error,
     refetch: fetchUnifiedBalance,
-    walletClientReady
-  }
-}
+    walletClientReady,
+  };
+};

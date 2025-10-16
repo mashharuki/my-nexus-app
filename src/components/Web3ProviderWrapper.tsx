@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import dynamic from 'next/dynamic'
-import { ReactNode } from 'react'
+import dynamic from 'next/dynamic';
+import type { ReactNode } from 'react';
 
 const Web3Provider = dynamic(() => import('@/providers/Web3Provider'), {
   ssr: false,
-  loading: () => <div>Loading...</div>
-})
+  loading: () => <div>Loading...</div>,
+});
 
 interface Web3ProviderWrapperProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export default function Web3ProviderWrapper({ children }: Web3ProviderWrapperProps) {
-  return <Web3Provider>{children}</Web3Provider>
+  return <Web3Provider>{children}</Web3Provider>;
 }

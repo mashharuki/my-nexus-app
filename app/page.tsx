@@ -1,9 +1,9 @@
-import Nexus from '@/components/nexus/nexus'
-import ViewUnifiedBalance from '@/components/nexus/view-balance'
+import Nexus from '@/components/nexus/nexus';
+import ViewUnifiedBalance from '@/components/nexus/view-balance';
 
 /**
  * App Component
- * @returns 
+ * @returns
  */
 export default function HomePage() {
   return (
@@ -23,11 +23,11 @@ export default function HomePage() {
 
         <div className="text-center mt-8">
           <p className="text-sm text-gray-500">
-            This demo showcases Nexus SDK integration for cross-chain operations. 
-            Connect your wallet to experience the full functionality.
+            This demo showcases Nexus SDK integration for cross-chain operations. Connect your
+            wallet to experience the full functionality.
           </p>
         </div>
       </div>
     </div>
-  )
+  );
 }
