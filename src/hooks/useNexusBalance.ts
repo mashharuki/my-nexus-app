@@ -28,6 +28,11 @@ interface EthereumProvider {
   [key: string]: unknown;
 }
 
+// window.ethereum用の型定義
+interface WindowWithEthereum extends Window {
+  ethereum?: EthereumProvider;
+}
+
 interface NexusBalance {
   symbol: string;
   balance: string;
@@ -105,7 +110,6 @@ export const useNexusBalance = () => {
   });
 
   const fetchUnifiedBalance = async (retryCount = 0) => {
-
     if (!isConnected || !address) {
       setUnifiedBalance(null);
       setError('Please connect your wallet first');
@@ -117,35 +121,40 @@ export const useNexusBalance = () => {
     setError(null);
 
     // walletClientまたはconnectorClientを取得する関数
-    const getWalletClient = async (): Promise<any> => {
+    const getWalletClient = async (): Promise<EthereumProvider | null> => {
       let attempts = 0;
       const maxAttempts = 30; // 3秒間待機
-      
+
       while (attempts < maxAttempts) {
         const client = walletClient || connectorClient;
         if (client) {
-          return client;
+          // WagmiクライアントをEthereumProvider形式に変換
+          return {
+            ...client,
+            on: (_event: string, _callback: (...args: unknown[]) => void) => client as unknown as EthereumProvider,
+            removeListener: (_event: string, _callback: (...args: unknown[]) => void) => client as unknown as EthereumProvider,
+          } as unknown as EthereumProvider;
         }
-        
+
         // window.ethereumに直接アクセスを試行
-        if (typeof window !== 'undefined' && (window as any).ethereum) {
-          return (window as any).ethereum;
+        if (typeof window !== 'undefined' && (window as WindowWithEthereum).ethereum) {
+          return (window as WindowWithEthereum).ethereum as EthereumProvider;
         }
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         attempts++;
       }
-      
+
       // 最後の手段としてwindow.ethereumを返す
-      if (typeof window !== 'undefined' && (window as any).ethereum) {
-        return (window as any).ethereum;
+      if (typeof window !== 'undefined' && (window as WindowWithEthereum).ethereum) {
+        return (window as WindowWithEthereum).ethereum as EthereumProvider;
       }
-      
+
       return null;
     };
 
     // クライアントを取得
     const clientToUse = await getWalletClient();
-    
+
     if (!clientToUse) {
       // リトライ回数が3回未満の場合は再試行
       if (retryCount < 3) {
@@ -154,7 +163,7 @@ export const useNexusBalance = () => {
         }, 1000);
         return;
       }
-      
+
       // 最大リトライ回数に達した場合はフォールバック
       setUnifiedBalance({
         totalUSD: 0,
@@ -170,16 +179,15 @@ export const useNexusBalance = () => {
       const shouldReinitialize = !nexusInitialized || lastConnectedAddress !== address;
 
       if (shouldReinitialize) {
-
         // 使用するクライアントを決定（既に取得済みのclientToUseを使用）
         if (!clientToUse) {
           throw new Error('No wallet client available for initialization');
         }
-        
+
         // WalletClientをEthereumProvider形式に変換
         let ethereumProvider: EthereumProvider;
-        
-        if (clientToUse === (window as any).ethereum) {
+
+        if (clientToUse === (window as WindowWithEthereum).ethereum) {
           // window.ethereumを直接使用する場合
           ethereumProvider = {
             ...clientToUse,
@@ -229,7 +237,6 @@ export const useNexusBalance = () => {
         const processedBalances: TokenBalance[] = [];
 
         balances.forEach((asset: NexusBalance) => {
-
           // breakdown配列がある場合は、各チェーンの残高を個別に処理
           if (asset.breakdown && Array.isArray(asset.breakdown)) {
             asset.breakdown.forEach((breakdownItem) => {
@@ -399,15 +406,15 @@ export const useNexusBalance = () => {
   // walletClientの準備状況を監視
   useEffect(() => {
     const clientToUse = walletClient || connectorClient;
-    const windowEthereum = typeof window !== 'undefined' ? !!(window as any).ethereum : false;
-    
+    const windowEthereum = typeof window !== 'undefined' ? !!(window as WindowWithEthereum).ethereum : false;
+
     // window.ethereumが利用可能な場合も準備完了とする
     if ((clientToUse || windowEthereum) && isConnected && address) {
       setWalletClientReady(true);
     } else {
       setWalletClientReady(false);
     }
-  }, [walletClient, connectorClient, isConnected, address, chainId]);
+  }, [walletClient, connectorClient, isConnected, address]);
 
   // ウォレット接続状態の変化を監視
   useEffect(() => {

@@ -32,7 +32,7 @@ const ViewUnifiedBalance = () => {
     } else {
       setIsWalletReady(false);
     }
-  }, [isConnected, address, chainId]);
+  }, [isConnected, address]);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -96,11 +96,7 @@ const ViewUnifiedBalance = () => {
                   This is demo data. The actual Nexus SDK API is currently unavailable.
                 </p>
                 <div className="flex gap-2 mt-3">
-                  <Button 
-                    onClick={() => refetch()}
-                    className="text-sm" 
-                    size="sm"
-                  >
+                  <Button onClick={() => refetch()} className="text-sm" size="sm">
                     Retry
                   </Button>
                   <Button
