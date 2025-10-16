@@ -17,24 +17,22 @@ import { useWeb3Context } from '@/providers/Web3Provider';
 const ViewUnifiedBalance = () => {
   const { isConnected, address, chainId } = useAccount();
   const { network } = useWeb3Context();
-  const { unifiedBalance, loading, error, refetch, walletClientReady } = useNexusBalance();
+  const { unifiedBalance, loading, error, refetch } = useNexusBalance();
   const [isOpen, setIsOpen] = useState(false);
   const [isWalletReady, setIsWalletReady] = useState(false);
 
   // ウォレット接続状態の安定を待つ
   useEffect(() => {
-    if (isConnected && address && walletClientReady) {
-      // ウォレット接続後、walletClientが準備できてから準備完了とする
+    if (isConnected && address) {
+      // ウォレット接続後、少し待ってから準備完了とする
       const timer = setTimeout(() => {
-        console.log('Setting wallet ready to true');
         setIsWalletReady(true);
-      }, 500); // walletClientが準備できているので短縮
+      }, 1000); // 1秒待機
       return () => clearTimeout(timer);
     } else {
-      console.log('Wallet not ready:', { isConnected, address, walletClientReady });
       setIsWalletReady(false);
     }
-  }, [isConnected, address, walletClientReady]);
+  }, [isConnected, address, chainId]);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -43,7 +41,7 @@ const ViewUnifiedBalance = () => {
       // ウォレットが準備完了してから実行
       setTimeout(() => {
         refetch();
-      }, 100);
+      }, 200); // 少し長めの遅延を設定
     }
   };
 
@@ -53,11 +51,9 @@ const ViewUnifiedBalance = () => {
         <Button className="font-bold" disabled={!isWalletReady}>
           {isWalletReady
             ? 'View Unified Balance'
-            : isConnected && !walletClientReady
-              ? 'Preparing Wallet Client...'
-              : isConnected
-                ? 'Preparing Wallet...'
-                : 'Connect Wallet to View Balance'}
+            : isConnected
+              ? 'Preparing Wallet...'
+              : 'Connect Wallet to View Balance'}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
@@ -71,8 +67,6 @@ const ViewUnifiedBalance = () => {
                   Address: {address?.slice(0, 6)}...{address?.slice(-4)}
                 </span>
               </span>
-            ) : isConnected && !walletClientReady ? (
-              'Wallet client is initializing, please wait...'
             ) : isConnected ? (
               'Wallet is connecting, please wait...'
             ) : (
@@ -102,7 +96,11 @@ const ViewUnifiedBalance = () => {
                   This is demo data. The actual Nexus SDK API is currently unavailable.
                 </p>
                 <div className="flex gap-2 mt-3">
-                  <Button onClick={refetch} className="text-sm" size="sm">
+                  <Button 
+                    onClick={() => refetch()}
+                    className="text-sm" 
+                    size="sm"
+                  >
                     Retry
                   </Button>
                   <Button
