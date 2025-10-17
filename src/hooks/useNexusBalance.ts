@@ -2,6 +2,7 @@
 import { NexusSDK } from '@avail-project/nexus-core';
 import { useEffect, useState } from 'react';
 import { useAccount, useBalance, useWalletClient, useConnectorClient } from 'wagmi';
+import { mockUnifiedBalance } from '@/mockdatas';
 
 interface TokenBalance {
   chain: string;
@@ -351,54 +352,7 @@ export const useNexusBalance = () => {
       }
 
       // Nexus SDKが利用できない場合のフォールバック（モックデータ）
-
-      const mockBalance: UnifiedBalance = {
-        totalUSD: 1250.75,
-        balances: [
-          {
-            chain: 'Ethereum',
-            token: 'ETH',
-            balance: '0.5',
-            symbol: 'ETH',
-            decimals: 18,
-            usdValue: 1000,
-          },
-          {
-            chain: 'Ethereum',
-            token: 'USDC',
-            balance: '1000',
-            symbol: 'USDC',
-            decimals: 6,
-            usdValue: 1000,
-          },
-          {
-            chain: 'Base',
-            token: 'ETH',
-            balance: '0.1',
-            symbol: 'ETH',
-            decimals: 18,
-            usdValue: 200,
-          },
-          {
-            chain: 'Arbitrum',
-            token: 'USDT',
-            balance: '500',
-            symbol: 'USDT',
-            decimals: 6,
-            usdValue: 500,
-          },
-          {
-            chain: 'Polygon',
-            token: 'MATIC',
-            balance: '100',
-            symbol: 'MATIC',
-            decimals: 18,
-            usdValue: 50.75,
-          },
-        ],
-      };
-
-      setUnifiedBalance(mockBalance);
+      setUnifiedBalance(mockUnifiedBalance);
       setError(errorMessage);
     } finally {
       setLoading(false);

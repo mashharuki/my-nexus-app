@@ -3,6 +3,7 @@ import { Button } from '@/components/atoms/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/Card';
 import { Wallet, TrendingUp, Users, ExternalLink } from 'lucide-react';
 import { AdminConversionCard } from '@/components/organisms/AdminConversionCard';
+import { getProjectById, mockBalances, mockTransactions } from '@/mockdatas';
 
 export default async function AdminDashboardPage({
   params,
@@ -12,57 +13,10 @@ export default async function AdminDashboardPage({
   const { projectId } = await params;
 
   // モックデータ
-  const project = {
-    id: projectId,
-    name: 'オープンソース開発支援',
-    unifiedAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
-    targetToken: 'USDC',
-    targetChain: 'Arbitrum Sepolia',
-  };
-
-  const balances = [
-    { chain: 'Sepolia', token: 'ETH', amount: '2.5', usdValue: 6250 },
-    { chain: 'Sepolia', token: 'PYUSD', amount: '1,200', usdValue: 1200 },
-    { chain: 'Arbitrum Sepolia', token: 'ETH', amount: '1.8', usdValue: 4500 },
-    { chain: 'Arbitrum Sepolia', token: 'USDC', amount: '3,450', usdValue: 3450 },
-  ];
-
+  const project = getProjectById(projectId);
+  const balances = mockBalances;
   const totalUsdValue = balances.reduce((sum, b) => sum + b.usdValue, 0);
-
-  const transactions = [
-    {
-      type: 'donation',
-      from: '0x1234...5678',
-      amount: '0.5 ETH',
-      chain: 'Sepolia',
-      timestamp: '2025-01-10 14:30',
-      status: 'confirmed',
-    },
-    {
-      type: 'conversion',
-      from: 'System',
-      amount: '2.0 ETH → 5,000 USDC',
-      chain: 'Arbitrum Sepolia',
-      timestamp: '2025-01-10 12:00',
-      status: 'completed',
-    },
-    {
-      type: 'donation',
-      from: '0x8765...4321',
-      amount: '100 USDC',
-      chain: 'Arbitrum Sepolia',
-      timestamp: '2025-01-10 11:45',
-      status: 'confirmed',
-    },
-    {
-      type: 'withdrawal',
-      from: 'Admin',
-      amount: '2,000 USDC',
-      chain: 'Arbitrum Sepolia',
-      timestamp: '2025-01-09 16:20',
-      status: 'completed',
-    },
-  ];
+  const transactions = mockTransactions;
 
   return (
     <div className="min-h-screen bg-background">

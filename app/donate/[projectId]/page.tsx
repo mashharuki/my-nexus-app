@@ -3,49 +3,15 @@ import { Button } from '@/components/atoms/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/Card';
 import { Coins, ExternalLink, TrendingUp, Zap, Shield } from 'lucide-react';
 import { DonatePageClient } from '@/components/organisms/DonatePageClient';
+import { getProjectById, mockSupportedTokens, mockRecentDonations } from '@/mockdatas';
 
 export default async function DonatePage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params;
 
   // モックデータ
-  const project = {
-    id: projectId,
-    name: 'オープンソース開発支援',
-    description: 'Web3エコシステムのオープンソースプロジェクトを支援',
-    unifiedAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
-    targetToken: 'USDC',
-    targetChain: 'Arbitrum Sepolia',
-  };
-
-  const supportedTokens = [
-    { symbol: 'ETH', name: 'Ethereum', chains: ['Sepolia', 'Arbitrum Sepolia'] },
-    { symbol: 'USDC', name: 'USD Coin', chains: ['Sepolia', 'Arbitrum Sepolia'] },
-    { symbol: 'PYUSD', name: 'PayPal USD', chains: ['Sepolia', 'Arbitrum Sepolia'] },
-  ];
-
-  const recentDonations = [
-    {
-      donor: '0x1234...5678',
-      amount: '0.5 ETH',
-      chain: 'Sepolia',
-      timestamp: '2分前',
-      txHash: '0xabcd...efgh',
-    },
-    {
-      donor: '0x8765...4321',
-      amount: '100 USDC',
-      chain: 'Arbitrum Sepolia',
-      timestamp: '15分前',
-      txHash: '0xijkl...mnop',
-    },
-    {
-      donor: '0x9876...1234',
-      amount: '50 PYUSD',
-      chain: 'Sepolia',
-      timestamp: '1時間前',
-      txHash: '0xqrst...uvwx',
-    },
-  ];
+  const project = getProjectById(projectId);
+  const supportedTokens = mockSupportedTokens;
+  const recentDonations = mockRecentDonations;
 
   return (
     <div className="min-h-screen bg-background">

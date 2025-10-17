@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import '../src/themes/styles/globals.css';
+import '@/themes/styles/globals.css';
 import Header from '@/components/organisms/Header';
 import Footer from '@/components/organisms/Footer';
 import Web3ProviderWrapper from '@/components/providers/Web3ProviderWrapper';

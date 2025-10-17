@@ -2,40 +2,13 @@ import Link from 'next/link';
 import { Button } from '@/components/atoms/Button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/atoms/Card';
 import { ArrowRight, Globe, Shield, Zap, Users, TrendingUp, Sparkles, Coins } from 'lucide-react';
+import { mockProjects } from '@/mockdatas';
 
 /**
  * CrossDonate Homepage - Exact V0 Design Replica
  * @returns
  */
 export default function HomePage() {
-  // Mock projects - matching V0 design
-  const mockProjects = [
-    {
-      id: 'project-1',
-      name: '海洋プラスチック汚染解決プロジェクト',
-      description: '海洋プラスチック汚染の解決に向けた革新的な技術開発と普及活動を支援します。',
-      totalDonations: '$32,450',
-      donorCount: 247,
-      chains: ['Ethereum', 'Polygon', 'BSC'],
-    },
-    {
-      id: 'project-2',
-      name: '教育格差解消プロジェクト',
-      description: '世界中の子どもたちに質の高い教育を提供するための支援活動です。',
-      totalDonations: '$67,890',
-      donorCount: 189,
-      chains: ['Ethereum', 'Arbitrum', 'Optimism'],
-    },
-    {
-      id: 'project-3',
-      name: '医療アクセス向上プロジェクト',
-      description: '医療が不足している地域に質の高い医療サービスを提供する活動です。',
-      totalDonations: '$45,670',
-      donorCount: 156,
-      chains: ['Polygon', 'BSC', 'Avalanche'],
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section - V0 Style */}
@@ -262,7 +235,7 @@ export default function HomePage() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {project.chains.map((chain) => (
+                    {project.chains?.map((chain) => (
                       <span
                         key={chain}
                         className="text-xs font-semibold px-3 py-1.5 bg-gradient-to-r from-primary/10 to-accent/10 text-primary border border-primary/20 rounded-full"
