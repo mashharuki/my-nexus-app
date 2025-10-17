@@ -150,4 +150,13 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* リンクスタイル - BaseLayout.tsxから移植 */
+  a {
+    @apply text-primary no-underline transition-colors duration-300;
+  }
+  
+  a:hover {
+    @apply text-accent;
+  }
 }
