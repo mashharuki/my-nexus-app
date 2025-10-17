@@ -2,7 +2,7 @@
 
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 interface WalletConnectButtonProps {
@@ -12,6 +12,15 @@ interface WalletConnectButtonProps {
 export default function WalletConnectButton({ onConnectionChange }: WalletConnectButtonProps) {
   const { isTablet } = useMediaQuery();
   const [lastConnectedState, setLastConnectedState] = useState<boolean | null>(null);
+  const [currentConnectedState, setCurrentConnectedState] = useState<boolean | null>(null);
+
+  // 接続状態の変更を監視してuseEffectで処理
+  useEffect(() => {
+    if (onConnectionChange && currentConnectedState !== lastConnectedState) {
+      setLastConnectedState(currentConnectedState);
+      onConnectionChange(!!currentConnectedState);
+    }
+  }, [currentConnectedState, lastConnectedState, onConnectionChange]);
 
   return (
     <div className="flex items-center">
@@ -34,10 +43,9 @@ export default function WalletConnectButton({ onConnectionChange }: WalletConnec
             chain &&
             (!authenticationStatus || authenticationStatus === 'authenticated');
 
-          // 接続状態が変更されたときにコールバックを呼び出す
-          if (onConnectionChange && connected !== lastConnectedState) {
-            setLastConnectedState(!!connected);
-            onConnectionChange(!!connected);
+          // 接続状態を更新（レンダリング中ではなくuseEffectで処理される）
+          if (connected !== currentConnectedState) {
+            setCurrentConnectedState(!!connected);
           }
 
           return (
