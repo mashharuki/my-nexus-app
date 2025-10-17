@@ -1,4 +1,3 @@
-import { useBalance } from 'wagmi';
 import type { TokenBalance, UnifiedBalance, NexusBalance, NexusBalanceBreakdown } from '@/types';
 
 // チェーン名のマッピング関数
