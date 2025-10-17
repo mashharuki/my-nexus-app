@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/atoms/Button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/Card';
 import { Wallet, TrendingUp, Users, ExternalLink } from 'lucide-react';
-import { AdminConversionCard } from '@/components/AdminConversionCard';
+import { AdminConversionCard } from '@/components/organisms/AdminConversionCard';
 
 export default async function AdminDashboardPage({
   params,

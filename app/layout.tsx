@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import '../src/css/globals.css';
-import Header from '@/components/common/Header';
-import Footer from '@/components/common/Footer';
-import Web3ProviderWrapper from '@/components/Web3ProviderWrapper';
+import Header from '@/components/organisms/Header';
+import Footer from '@/components/organisms/Footer';
+import Web3ProviderWrapper from '@/components/providers/Web3ProviderWrapper';
 
 export const metadata: Metadata = {
   title: 'CrossDonate',

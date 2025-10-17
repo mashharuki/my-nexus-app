@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/atoms/Button';
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/Dialog';
+} from '@/components/atoms/Dialog';
 import { useNexusBalance } from '@/hooks/useNexusBalance';
 import { useWeb3Context } from '@/providers/Web3Provider';
 
