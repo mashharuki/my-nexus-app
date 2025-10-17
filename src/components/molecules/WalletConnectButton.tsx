@@ -2,10 +2,16 @@
 
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Image from 'next/image';
+import { useState } from 'react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
-export default function WalletConnectButton() {
+interface WalletConnectButtonProps {
+  onConnectionChange?: (isConnected: boolean) => void;
+}
+
+export default function WalletConnectButton({ onConnectionChange }: WalletConnectButtonProps) {
   const { isTablet } = useMediaQuery();
+  const [lastConnectedState, setLastConnectedState] = useState<boolean | null>(null);
 
   return (
     <div className="flex items-center">
@@ -27,6 +33,12 @@ export default function WalletConnectButton() {
             account &&
             chain &&
             (!authenticationStatus || authenticationStatus === 'authenticated');
+
+          // 接続状態が変更されたときにコールバックを呼び出す
+          if (onConnectionChange && connected !== lastConnectedState) {
+            setLastConnectedState(!!connected);
+            onConnectionChange(!!connected);
+          }
 
           return (
             <div
@@ -52,7 +64,8 @@ export default function WalletConnectButton() {
                         fontSize: isTablet ? '1rem' : '0.75rem',
                       }}
                     >
-                      ウォレットを接続
+                      <span className={isTablet ? 'inline' : 'hidden'}>ウォレットを接続</span>
+                      <span className={isTablet ? 'hidden' : 'inline'}>ウォレット接続</span>
                     </button>
                   );
                 }
@@ -71,7 +84,7 @@ export default function WalletConnectButton() {
                       }}
                     >
                       <span className={isTablet ? 'inline' : 'hidden'}>間違ったネットワーク</span>
-                      <span className={isTablet ? 'hidden' : 'inline'}>間違ったネットワーク</span>
+                      <span className={isTablet ? 'hidden' : 'inline'}>ネットワーク</span>
                     </button>
                   );
                 }
