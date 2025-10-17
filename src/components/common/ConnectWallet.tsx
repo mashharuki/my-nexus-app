@@ -4,7 +4,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { cn } from '@/lib/utils';
 
-export default function WalletConnection() {
+export default function ConnectWallet() {
   const { status } = useAccount();
 
   return (

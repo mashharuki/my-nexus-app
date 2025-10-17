@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Copy, Check, QrCode } from 'lucide-react';
 
 export function DonatePageClient({ unifiedAddress }: { unifiedAddress: string }) {

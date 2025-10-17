@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { ArrowRight, Globe, Shield, Zap, Users, TrendingUp, Sparkles, Coins } from 'lucide-react';
 
 /**

@@ -1,8 +1,8 @@
 'use client';
 
 import { useAccount } from 'wagmi';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/Button';
+import { Card, CardContent } from '@/components/ui/Card';
 import { useWeb3Context } from '@/providers/Web3Provider';
 
 const Nexus = () => {
