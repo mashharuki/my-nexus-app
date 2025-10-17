@@ -69,9 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Base Layout Styles - converted from emotion to Tailwind */}
           <div className="min-h-screen bg-background text-foreground flex flex-col">
             <Header />
-            <main className="flex-1 flex flex-col w-full">
-              {children}
-            </main>
+            <main className="flex-1 flex flex-col w-full">{children}</main>
             <Footer />
           </div>
         </Web3ProviderWrapper>

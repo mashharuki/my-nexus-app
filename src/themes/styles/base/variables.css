@@ -38,11 +38,11 @@
   --sidebar-accent-foreground: oklch(0.12 0.015 270);
   --sidebar-border: oklch(0.88 0.01 270);
   --sidebar-ring: oklch(0.5 0.22 270);
-  
+
   /* フォント設定 */
   --font-sans: "THICCCBOI", sans-serif;
   --font-mono: var(--font-geist-mono);
-  
+
   /* シャドウ設定 */
   --shadow-2xs: 0px 2px 3px 0px hsl(28 18% 25% / 0.09);
   --shadow-xs: 0px 2px 3px 0px hsl(28 18% 25% / 0.09);
@@ -52,7 +52,7 @@
   --shadow-lg: 0px 2px 3px 0px hsl(28 18% 25% / 0.18), 0px 4px 6px -1px hsl(28 18% 25% / 0.18);
   --shadow-xl: 0px 2px 3px 0px hsl(28 18% 25% / 0.18), 0px 8px 10px -1px hsl(28 18% 25% / 0.18);
   --shadow-2xl: 0px 2px 3px 0px hsl(28 18% 25% / 0.45);
-  
+
   /* その他の設定 */
   --tracking-normal: 0em;
   --spacing: 0.25rem;
@@ -150,12 +150,12 @@
   body {
     @apply bg-background text-foreground;
   }
-  
+
   /* リンクスタイル - BaseLayout.tsxから移植 */
   a {
     @apply text-primary no-underline transition-colors duration-300;
   }
-  
+
   a:hover {
     @apply text-accent;
   }
