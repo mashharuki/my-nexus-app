@@ -13,8 +13,7 @@
     "format": "biome format .",
     "format:fix": "biome format --write .",
     "check": "biome check .",
-    "check:fix": "biome check --write .",
-    "test": "vitest run"
+    "check:fix": "biome check --write ."
   },
   "dependencies": {
     "@avail-project/nexus-core": "0.0.1-beta.0",
@@ -44,16 +43,11 @@
   "devDependencies": {
     "@biomejs/biome": "^2.2.6",
     "@tailwindcss/postcss": "^4.1.14",
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/react": "^16.2.0",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "autoprefixer": "^10.4.20",
-    "jsdom": "^26.0.0",
     "postcss": "^8.4.49",
     "tw-animate-css": "^1.3.4",
-    "typescript": "^5.7.2",
-    "vitest": "^3.0.5",
-    "web-vitals": "^4.2.4"
+    "typescript": "^5.7.2"
   }
 }
