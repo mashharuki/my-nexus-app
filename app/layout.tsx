@@ -63,10 +63,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth">
       <body suppressHydrationWarning={true} className="font-sans antialiased">
         <Web3ProviderWrapper>
-          {/* Base Layout Styles - converted from emotion to Tailwind */}
           <div className="min-h-screen bg-background text-foreground flex flex-col">
             <Header />
             <main className="flex-1 flex flex-col w-full">{children}</main>
