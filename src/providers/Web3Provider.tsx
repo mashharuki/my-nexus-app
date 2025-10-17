@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { WagmiProvider } from 'wagmi';
 import { arbitrumSepolia, baseSepolia, optimismSepolia, polygonAmoy, sepolia } from 'wagmi/chains';
+import { initializeAnalyticsSuppression } from '@/utils/analyticsSuppressor';
 
 const walletConnectProjectId =
   process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id';
@@ -60,6 +61,8 @@ const Web3Provider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     setMounted(true);
+    // Analytics SDKのエラー抑制を初期化
+    initializeAnalyticsSuppression();
   }, []);
 
   if (!mounted) {
