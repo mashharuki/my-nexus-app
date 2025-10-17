@@ -8,38 +8,35 @@ if (typeof window !== 'undefined') {
   // 元のconsole.errorを保存
   const originalConsoleError = console.error;
   const originalConsoleWarn = console.warn;
-  
+
   // console.errorをオーバーライド
-  console.error = (...args: any[]) => {
+  console.error = (...args: unknown[]) => {
     const errorMessage = args.join(' ');
-    
+
     // Analytics SDK関連のエラーを完全にフィルタリング
     if (
       errorMessage.includes('Analytics SDK') ||
       errorMessage.includes('AnalyticsSDKApiError') ||
       errorMessage.includes('Failed to fetch') ||
-      errorMessage.includes('context: \'AnalyticsSDKApiError\'')
+      errorMessage.includes("context: 'AnalyticsSDKApiError'")
     ) {
       // このエラーは完全に無視
       return;
     }
-    
+
     // その他のエラーは通常通り出力
     originalConsoleError.apply(console, args);
   };
 
   // console.warnもオーバーライド
-  console.warn = (...args: any[]) => {
+  console.warn = (...args: unknown[]) => {
     const warningMessage = args.join(' ');
-    
+
     // Analytics関連の警告もフィルタリング
-    if (
-      warningMessage.includes('Analytics') ||
-      warningMessage.includes('Failed to fetch')
-    ) {
+    if (warningMessage.includes('Analytics') || warningMessage.includes('Failed to fetch')) {
       return;
     }
-    
+
     originalConsoleWarn.apply(console, args);
   };
 
@@ -51,8 +48,8 @@ if (typeof window !== 'undefined') {
       typeof error === 'object' &&
       error.message &&
       (error.message.includes('Failed to fetch') ||
-       error.message.includes('Analytics') ||
-       error.message.includes('AnalyticsSDKApiError'))
+        error.message.includes('Analytics') ||
+        error.message.includes('AnalyticsSDKApiError'))
     ) {
       // Analytics関連のエラーを完全に抑制
       event.preventDefault();
@@ -69,8 +66,8 @@ if (typeof window !== 'undefined') {
       typeof error === 'object' &&
       error.message &&
       (error.message.includes('Failed to fetch') ||
-       error.message.includes('Analytics') ||
-       error.message.includes('AnalyticsSDKApiError'))
+        error.message.includes('Analytics') ||
+        error.message.includes('AnalyticsSDKApiError'))
     ) {
       // Analytics関連のエラーを完全に抑制
       event.preventDefault();
@@ -87,11 +84,11 @@ export function suppressAnalyticsRequests() {
   if (typeof window === 'undefined') return;
 
   const originalFetch = window.fetch;
-  
+
   window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     // Analytics関連のリクエストを検出してブロック
     const url = typeof input === 'string' ? input : input.toString();
-    
+
     if (
       url.includes('analytics') ||
       url.includes('tracking') ||
@@ -104,15 +101,14 @@ export function suppressAnalyticsRequests() {
         headers: { 'Content-Type': 'application/json' },
       });
     }
-    
+
     try {
       return await originalFetch(input, init);
     } catch (error) {
       // Analytics関連のエラーを抑制
       if (
         error instanceof Error &&
-        (error.message.includes('Failed to fetch') ||
-         error.message.includes('Analytics'))
+        (error.message.includes('Failed to fetch') || error.message.includes('Analytics'))
       ) {
         return new Response(JSON.stringify({ success: true, suppressed: true }), {
           status: 200,
