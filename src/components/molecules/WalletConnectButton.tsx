@@ -2,8 +2,22 @@
 
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 
 export default function WalletConnectButton() {
+  const [isTablet, setIsTablet] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsTablet(window.innerWidth >= 768);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
   return (
     <div className="flex items-center">
       <ConnectButton.Custom>
@@ -42,7 +56,12 @@ export default function WalletConnectButton() {
                     <button
                       onClick={openConnectModal}
                       type="button"
-                      className="bg-gradient-to-r from-primary to-accent text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:shadow-lg hover:scale-105 transition-all duration-200 glow-primary"
+                      className="bg-gradient-to-r from-primary to-accent text-white px-4 tablet:px-12 py-2 tablet:py-4 rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all duration-200 glow-primary"
+                      style={{
+                        minWidth: isTablet ? '150px' : 'auto',
+                        minHeight: isTablet ? '48px' : 'auto',
+                        fontSize: isTablet ? '1rem' : '0.75rem',
+                      }}
                     >
                       ウォレットを接続
                     </button>
@@ -54,51 +73,59 @@ export default function WalletConnectButton() {
                     <button
                       onClick={openChainModal}
                       type="button"
-                      className="bg-red-500 text-white px-4 py-2 rounded-xl font-semibold text-sm hover:bg-red-600 transition-colors"
+                      className="bg-red-500 text-white px-3 sm:px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm hover:bg-red-600 transition-colors"
                     >
-                      間違ったネットワーク
+                      <span className="hidden sm:inline">間違ったネットワーク</span>
+                      <span className="sm:hidden">ネットワーク</span>
                     </button>
                   );
                 }
 
                 return (
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1 sm:gap-3">
                     <button
                       onClick={openChainModal}
                       type="button"
-                      className="flex items-center gap-2 bg-background border border-border px-3 py-2 rounded-lg hover:bg-accent/10 transition-colors"
+                      className="flex items-center gap-1 sm:gap-2 bg-background border border-border px-2 sm:px-3 py-2 rounded-lg hover:bg-accent/10 transition-colors text-xs sm:text-sm"
                     >
                       {chain.hasIcon && (
                         <div
                           style={{
                             background: chain.iconBackground,
-                            width: 16,
-                            height: 16,
+                            width: 14,
+                            height: 14,
                             borderRadius: 999,
                             overflow: 'hidden',
-                            marginRight: 4,
+                            marginRight: 2,
                           }}
                         >
                           {chain.iconUrl && (
                             <Image
-                              width={16}
-                              height={16}
+                              width={14}
+                              height={14}
                               src={chain.iconUrl}
                               alt={chain.name ?? 'Chain icon'}
                             />
                           )}
                         </div>
                       )}
-                      {chain.name}
+                      <span className="hidden sm:inline">{chain.name}</span>
+                      <span className="sm:hidden">{chain.name?.split(' ')[0] || 'Unknown'}</span>
                     </button>
 
                     <button
                       onClick={openAccountModal}
                       type="button"
-                      className="bg-gradient-to-r from-primary to-accent text-white px-4 py-2 rounded-xl font-semibold text-sm hover:shadow-lg hover:scale-105 transition-all duration-200 glow-primary"
+                      className="bg-gradient-to-r from-primary to-accent text-white px-2 sm:px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm hover:shadow-lg hover:scale-105 transition-all duration-200 glow-primary truncate max-w-[120px] sm:max-w-none"
                     >
-                      {account.displayName}
-                      {account.displayBalance ? ` (${account.displayBalance})` : ''}
+                      <span className="hidden sm:inline">
+                        {account.displayName}
+                        {account.displayBalance ? ` (${account.displayBalance})` : ''}
+                      </span>
+                      <span className="sm:hidden">
+                        {account.displayName?.slice(0, 6)}...
+                        {account.displayBalance ? ` (${account.displayBalance})` : ''}
+                      </span>
                     </button>
                   </div>
                 );
