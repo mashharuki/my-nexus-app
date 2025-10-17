@@ -10,13 +10,18 @@ interface ConnectedWalletProps {
   config: ResponsiveConfig;
 }
 
-export function ConnectedWallet({ walletInfo, onSwitchChain, onOpenAccount, config }: ConnectedWalletProps) {
+export function ConnectedWallet({
+  walletInfo,
+  onSwitchChain,
+  onOpenAccount,
+  config,
+}: ConnectedWalletProps) {
   const styles = getResponsiveButtonStyles(config);
-  
+
   // フォーマットされたテキストを準備
   const formattedAddress = formatAddress(walletInfo.address);
   const formattedChainName = formatChainName(walletInfo.chain?.name);
-  
+
   const chainText = getResponsiveText(
     { full: walletInfo.chain?.name || 'Unknown', short: formattedChainName },
     config

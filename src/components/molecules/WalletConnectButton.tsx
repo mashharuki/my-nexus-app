@@ -52,14 +52,16 @@ export default function WalletConnectButton({ onConnectionChange }: WalletConnec
             address: account?.address,
             chainId: chain?.id,
             isConnected: !!connected,
-            chain: chain ? {
-              id: chain.id,
-              name: chain.name || 'Unknown',
-              unsupported: chain.unsupported,
-              hasIcon: chain.hasIcon,
-              iconUrl: chain.iconUrl,
-              iconBackground: chain.iconBackground,
-            } : undefined,
+            chain: chain
+              ? {
+                  id: chain.id,
+                  name: chain.name || 'Unknown',
+                  unsupported: chain.unsupported,
+                  hasIcon: chain.hasIcon,
+                  iconUrl: chain.iconUrl,
+                  iconBackground: chain.iconBackground,
+                }
+              : undefined,
           };
 
           return (
@@ -74,15 +76,9 @@ export default function WalletConnectButton({ onConnectionChange }: WalletConnec
               })}
             >
               {!connected ? (
-                <ConnectButtonComponent
-                  onConnect={openConnectModal}
-                  config={config}
-                />
+                <ConnectButtonComponent onConnect={openConnectModal} config={config} />
               ) : chain?.unsupported ? (
-                <UnsupportedChainButton
-                  onSwitchChain={openChainModal}
-                  config={config}
-                />
+                <UnsupportedChainButton onSwitchChain={openChainModal} config={config} />
               ) : (
                 <ConnectedWallet
                   walletInfo={walletInfo}

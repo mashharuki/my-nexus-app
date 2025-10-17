@@ -8,10 +8,7 @@ interface ConnectButtonProps {
 
 export function ConnectButton({ onConnect, config }: ConnectButtonProps) {
   const styles = getResponsiveButtonStyles(config);
-  const text = getResponsiveText(
-    { full: 'ウォレットを接続', short: 'ウォレット接続' },
-    config
-  );
+  const text = getResponsiveText({ full: 'ウォレットを接続', short: 'ウォレット接続' }, config);
 
   return (
     <button

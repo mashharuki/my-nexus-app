@@ -30,7 +30,7 @@ export function getResponsiveButtonStyles(config: ResponsiveConfig) {
  */
 export function getResponsiveText(text: { full: string; short: string }, config: ResponsiveConfig) {
   const { isTablet } = config;
-  
+
   return {
     full: isTablet ? text.full : '',
     short: isTablet ? '' : text.short,

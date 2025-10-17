@@ -8,10 +8,7 @@ interface UnsupportedChainButtonProps {
 
 export function UnsupportedChainButton({ onSwitchChain, config }: UnsupportedChainButtonProps) {
   const styles = getResponsiveButtonStyles(config);
-  const text = getResponsiveText(
-    { full: '間違ったネットワーク', short: 'ネットワーク' },
-    config
-  );
+  const text = getResponsiveText({ full: '間違ったネットワーク', short: 'ネットワーク' }, config);
 
   return (
     <button

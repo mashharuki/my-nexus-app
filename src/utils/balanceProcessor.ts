@@ -1,4 +1,3 @@
-import { useBalance } from 'wagmi';
 import type { TokenBalance, UnifiedBalance, NexusBalance, NexusBalanceBreakdown } from '@/types';
 
 // チェーン名のマッピング関数
@@ -25,7 +24,12 @@ const getChainName = (chainId: number | string | undefined) => {
  */
 export function processNexusBalances(
   balances: NexusBalance[],
-  currentChainBalance?: { formatted: string; symbol: string; decimals: number; value: bigint } | null,
+  currentChainBalance?: {
+    formatted: string;
+    symbol: string;
+    decimals: number;
+    value: bigint;
+  } | null,
   chainId?: number
 ): UnifiedBalance {
   const processedBalances: TokenBalance[] = [];
@@ -37,8 +41,7 @@ export function processNexusBalances(
         if (parseFloat(breakdownItem.balance) > 0) {
           const chainInfo = breakdownItem.chain;
           const chainId =
-            (typeof chainInfo === 'object' ? chainInfo?.id : undefined) ||
-            breakdownItem.chainId;
+            (typeof chainInfo === 'object' ? chainInfo?.id : undefined) || breakdownItem.chainId;
           const chainName =
             (typeof chainInfo === 'object' ? chainInfo?.name : chainInfo) ||
             breakdownItem.chainName ||
@@ -66,11 +69,7 @@ export function processNexusBalances(
 
       processedBalances.push({
         chain:
-          asset.chainName ||
-          asset.chain ||
-          asset.network ||
-          getChainName(chainId) ||
-          'Unknown',
+          asset.chainName || asset.chain || asset.network || getChainName(chainId) || 'Unknown',
         token: asset.symbol || asset.token || 'Unknown',
         balance: asset.balance || asset.amount || asset.formattedBalance || '0',
         symbol: asset.symbol || 'Unknown',

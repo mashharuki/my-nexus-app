@@ -43,11 +43,7 @@ export const useNexusBalance = () => {
       });
 
       if (balances && Array.isArray(balances) && balances.length > 0) {
-        const processedBalance = processNexusBalances(
-          balances,
-          currentChainBalance,
-          chainId
-        );
+        const processedBalance = processNexusBalances(balances, currentChainBalance, chainId);
         setUnifiedBalance(processedBalance);
       } else {
         setUnifiedBalance({

@@ -15,7 +15,7 @@ export function useWalletConnection() {
 
   // 接続状態の変化を監視
   useEffect(() => {
-    setConnectionState(prev => ({
+    setConnectionState((prev) => ({
       ...prev,
       isConnected: !!isConnected && !!address,
     }));
