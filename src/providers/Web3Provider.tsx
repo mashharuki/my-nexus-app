@@ -71,16 +71,19 @@ const Web3Provider = ({ children }: { children: React.ReactNode }) => {
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider
-            modalSize="compact"
+            modalSize="wide"
             theme={lightTheme({
               accentColor: '#fe8b6c',
               accentColorForeground: 'white',
+              borderRadius: 'medium',
+              fontStack: 'system',
             })}
             showRecentTransactions={false}
             appInfo={{
-              appName: 'Nexus Sample App',
+              appName: 'CrossDonate',
               learnMoreUrl: undefined,
             }}
+            initialChain={sepolia}
           >
             <NexusProvider config={{ network }}>{children}</NexusProvider>
           </RainbowKitProvider>

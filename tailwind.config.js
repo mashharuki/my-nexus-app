@@ -11,6 +11,30 @@ export default {
       fontFamily: {
         sans: ['var(--font-sans)', 'THICCCBOI', 'sans-serif'],
       },
+      screens: {
+        'mobile-small': '479px',
+        mobile: '480px',
+        tablet: '768px',
+        laptop: '1024px',
+        desktop: '1440px',
+        monitor: '2560px',
+      },
+      spacing: {
+        // カスタムスペーシング（必要に応じて追加）
+        '18': '4.5rem',
+        '88': '22rem',
+        '128': '32rem',
+      },
+      zIndex: {
+        modal: '100',
+        drawer: '50',
+        floating: '40',
+        header: '30',
+        footer: '20',
+        front: '10',
+        default: '1',
+        background: '-10',
+      },
       colors: {
         background: 'var(--background)',
         foreground: 'var(--foreground)',

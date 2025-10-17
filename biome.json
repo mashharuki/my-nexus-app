@@ -5,9 +5,7 @@
     "rules": {
       "recommended": true,
       "a11y": {
-        "useSemanticElements": {
-          "level": "warn"
-        }
+        "useSemanticElements": "off"
       },
       "correctness": {
         "useExhaustiveDependencies": "warn"
