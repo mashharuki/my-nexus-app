@@ -6,3 +6,6 @@
 
 /* ユーティリティクラス */
 @import "./utilities/utilities.css";
+
+/* RainbowKit CSS */
+@import "@rainbow-me/rainbowkit/styles.css";

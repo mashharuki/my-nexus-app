@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Coins } from 'lucide-react';
+import WalletConnectButton from '@/components/molecules/WalletConnectButton';
 
 export default function Header() {
   return (
@@ -30,7 +30,7 @@ export default function Header() {
             ドキュメント
           </Link>
         </nav>
-        <ConnectButton />
+        <WalletConnectButton />
       </div>
     </header>
   );
