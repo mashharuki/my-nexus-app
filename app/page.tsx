@@ -1,16 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import {
-  ArrowRight,
-  Globe,
-  Shield,
-  Zap,
-  Users,
-  TrendingUp,
-  Sparkles,
-  Coins,
-} from 'lucide-react';
+import { ArrowRight, Globe, Shield, Zap, Users, TrendingUp, Sparkles, Coins } from 'lucide-react';
 
 /**
  * CrossDonate Homepage - Exact V0 Design Replica

@@ -2,101 +2,51 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Copy, QrCode } from 'lucide-react';
+import { Copy, Check, QrCode } from 'lucide-react';
 
-interface DonatePageClientProps {
-  unifiedAddress: string;
-}
-
-export default function DonatePageClient({ unifiedAddress }: DonatePageClientProps) {
+export function DonatePageClient({ unifiedAddress }: { unifiedAddress: string }) {
   const [copied, setCopied] = useState(false);
 
-  const handleCopyAddress = async () => {
-    try {
-      await navigator.clipboard.writeText(unifiedAddress);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      console.error('Failed to copy address:', error);
-    }
+  const handleCopy = () => {
+    navigator.clipboard.writeText(unifiedAddress);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="space-y-6">
-      {/* Unified Address Card */}
-      <Card className="shadow-lg border-0">
-        <CardContent className="p-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">統一アドレス</h3>
-          <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 mb-4">
-            <div className="text-sm text-gray-600 mb-2">このアドレスに寄付してください</div>
-            <div className="font-mono text-sm break-all text-gray-900 bg-white p-2 rounded border">
-              {unifiedAddress}
-            </div>
-            <Button
-              onClick={handleCopyAddress}
-              className="w-full mt-3 bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors"
-            >
-              <Copy className="w-4 h-4 mr-2" />
-              {copied ? 'コピーしました！' : 'アドレスをコピー'}
-            </Button>
-          </div>
+    <>
+      <div className="relative overflow-hidden rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/5 p-1">
+        <div className="flex items-center gap-3 bg-card rounded-lg p-4">
+          <code className="flex-1 text-sm md:text-base font-mono break-all font-semibold">
+            {unifiedAddress}
+          </code>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleCopy}
+            className="hover:bg-primary/10 transition-all"
+          >
+            {copied ? (
+              <Check className="w-5 h-5 text-accent" />
+            ) : (
+              <Copy className="w-5 h-5 text-primary" />
+            )}
+          </Button>
+        </div>
+      </div>
 
-          {/* QR Code Placeholder */}
-          <div className="bg-gray-100 rounded-lg p-8 text-center">
-            <div className="w-32 h-32 mx-auto bg-gray-200 rounded-lg flex items-center justify-center">
-              <QrCode className="w-16 h-16 text-gray-400" />
-            </div>
-            <p className="text-sm text-gray-600 mt-2">QRコードで簡単寄付</p>
+      <div className="relative overflow-hidden rounded-2xl border-2 border-dashed border-primary/30 bg-gradient-to-br from-primary/5 via-background to-accent/5 p-8">
+        <div className="text-center space-y-4">
+          <div className="w-56 h-56 mx-auto bg-white rounded-2xl flex items-center justify-center border-4 border-primary/20 shadow-xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5" />
+            <QrCode className="w-40 h-40 text-primary/40 relative z-10" />
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Quick Stats */}
-      <Card className="shadow-lg border-0">
-        <CardContent className="p-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">プロジェクト統計</h3>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">寄付者数</span>
-              <span className="font-semibold text-gray-900">247</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">平均寄付額</span>
-              <span className="font-semibold text-gray-900">$131.38</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">残り日数</span>
-              <span className="font-semibold text-gray-900">45日</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">完了率</span>
-              <span className="font-semibold text-purple-600">64.9%</span>
-            </div>
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-foreground">QRコードで簡単送金</p>
+            <p className="text-xs text-muted-foreground">本番環境で自動生成されます</p>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Support Info */}
-      <Card className="shadow-lg border-0 bg-gradient-to-br from-green-50 to-blue-50">
-        <CardContent className="p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-3">サポート方法</h3>
-          <ul className="space-y-2 text-sm text-gray-600">
-            <li className="flex items-center">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-              任意のチェーンから寄付可能
-            </li>
-            <li className="flex items-center">
-              <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-              低手数料での寄付
-            </li>
-            <li className="flex items-center">
-              <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
-              透明性の高い資金管理
-            </li>
-          </ul>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </div>
+    </>
   );
 }
