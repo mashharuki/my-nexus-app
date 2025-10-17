@@ -13,12 +13,9 @@ export function useErrorHandler() {
   });
 
   const setError = useCallback((error: string | Error | ApiError) => {
-    const errorMessage = typeof error === 'string' 
-      ? error 
-      : error instanceof Error 
-        ? error.message 
-        : error.message;
-    
+    const errorMessage =
+      typeof error === 'string' ? error : error instanceof Error ? error.message : error.message;
+
     setErrorState({
       error: errorMessage,
       isError: true,
@@ -32,15 +29,18 @@ export function useErrorHandler() {
     });
   }, []);
 
-  const handleError = useCallback((error: unknown, fallbackMessage = 'An error occurred') => {
-    if (error instanceof Error) {
-      setError(error);
-    } else if (typeof error === 'string') {
-      setError(error);
-    } else {
-      setError(fallbackMessage);
-    }
-  }, [setError]);
+  const handleError = useCallback(
+    (error: unknown, fallbackMessage = 'An error occurred') => {
+      if (error instanceof Error) {
+        setError(error);
+      } else if (typeof error === 'string') {
+        setError(error);
+      } else {
+        setError(fallbackMessage);
+      }
+    },
+    [setError]
+  );
 
   return {
     ...errorState,

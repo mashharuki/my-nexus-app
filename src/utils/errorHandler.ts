@@ -30,13 +30,13 @@ export async function withRetry<T>(
       return await fn();
     } catch (error) {
       lastError = error;
-      
+
       if (attempt === config.maxRetries) {
         throw error;
       }
 
       const delay = config.retryDelay * (config.backoffMultiplier || 1) ** attempt;
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 
@@ -46,7 +46,11 @@ export async function withRetry<T>(
 /**
  * APIエラーを作成する関数
  */
-export function createApiError(message: string, code?: string | number, details?: Record<string, unknown>): ApiError {
+export function createApiError(
+  message: string,
+  code?: string | number,
+  details?: Record<string, unknown>
+): ApiError {
   return {
     message,
     code,

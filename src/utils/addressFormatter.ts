@@ -5,17 +5,13 @@
  * @param endLength - 末尾から表示する文字数（デフォルト: 4）
  * @returns フォーマットされたアドレス（例: "0x1234...5678"）
  */
-export function formatAddress(
-  address: string | undefined,
-  startLength = 6,
-  endLength = 4
-): string {
+export function formatAddress(address: string | undefined, startLength = 6, endLength = 4): string {
   if (!address) return '';
-  
+
   if (address.length <= startLength + endLength) {
     return address;
   }
-  
+
   return `${address.slice(0, startLength)}...${address.slice(-endLength)}`;
 }
 

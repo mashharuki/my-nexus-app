@@ -28,12 +28,14 @@ export interface WalletInfo {
   address: string | undefined;
   chainId: number | undefined;
   isConnected: boolean;
-  chain: {
-    id: number;
-    name: string;
-    unsupported?: boolean;
-    hasIcon?: boolean;
-    iconUrl?: string;
-    iconBackground?: string;
-  } | undefined;
+  chain:
+    | {
+        id: number;
+        name: string;
+        unsupported?: boolean;
+        hasIcon?: boolean;
+        iconUrl?: string;
+        iconBackground?: string;
+      }
+    | undefined;
 }

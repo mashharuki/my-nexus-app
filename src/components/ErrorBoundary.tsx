@@ -33,16 +33,14 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   render() {
     if (this.state.hasError) {
-      if (this.props.fallback) {
+      if (this.props.fallback && this.state.error) {
         const FallbackComponent = this.props.fallback;
-        return <FallbackComponent error={this.state.error!} resetError={this.resetError} />;
+        return <FallbackComponent error={this.state.error} resetError={this.resetError} />;
       }
 
       return (
         <div className="flex flex-col items-center justify-center min-h-[200px] p-8 text-center">
-          <h2 className="text-xl font-semibold text-destructive mb-4">
-            エラーが発生しました
-          </h2>
+          <h2 className="text-xl font-semibold text-destructive mb-4">エラーが発生しました</h2>
           <p className="text-muted-foreground mb-6">
             {this.state.error?.message || '予期しないエラーが発生しました。'}
           </p>
@@ -58,12 +56,16 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 }
 
 // デフォルトのフォールバックコンポーネント
-export function DefaultErrorFallback({ error, resetError }: { error: Error; resetError: () => void }) {
+export function DefaultErrorFallback({
+  error,
+  resetError,
+}: {
+  error: Error;
+  resetError: () => void;
+}) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[200px] p-8 text-center">
-      <h2 className="text-xl font-semibold text-destructive mb-4">
-        エラーが発生しました
-      </h2>
+      <h2 className="text-xl font-semibold text-destructive mb-4">エラーが発生しました</h2>
       <p className="text-muted-foreground mb-6">
         {error.message || '予期しないエラーが発生しました。'}
       </p>
