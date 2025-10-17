@@ -1,16 +1,35 @@
 'use client';
 
+import Link from 'next/link';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import Image from 'next/image';
+import { Coins } from 'lucide-react';
 
 export default function Header() {
   return (
-    <header className="px-4 py-2 flex gap-x-4 text-black justify-between items-center border-b border-gray-300">
-      <nav className="flex flex-row">
-        <Image src="/avail-logo.svg" alt="Avail Logo" width={120} height={40} />
-      </nav>
-
-      <div className="flex items-center gap-x-4">
+    <header className="sticky top-0 z-50 glass-effect border-b">
+      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 gradient-primary rounded-xl flex items-center justify-center shadow-lg glow-primary">
+            <Coins className="w-6 h-6 text-white" />
+          </div>
+          <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            CrossDonate
+          </span>
+        </div>
+        <nav className="hidden md:flex items-center gap-8">
+          <Link href="/" className="text-sm font-semibold hover:text-primary transition-colors">
+            ホーム
+          </Link>
+          <Link
+            href="/create"
+            className="text-sm font-semibold hover:text-primary transition-colors"
+          >
+            プロジェクト作成
+          </Link>
+          <Link href="#" className="text-sm font-semibold hover:text-primary transition-colors">
+            ドキュメント
+          </Link>
+        </nav>
         <ConnectButton />
       </div>
     </header>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import '../src/css/globals.css';
-import Header from '@/components/common/header';
+import Header from '@/components/common/Header';
+import Footer from '@/components/common/Footer';
 import Web3ProviderWrapper from '@/components/Web3ProviderWrapper';
 
 export const metadata: Metadata = {
@@ -16,6 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="min-h-screen bg-background">
             <Header />
             {children}
+            <Footer />
           </div>
         </Web3ProviderWrapper>
       </body>

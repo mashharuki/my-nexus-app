@@ -131,8 +131,10 @@ export const useNexusBalance = () => {
           // WagmiクライアントをEthereumProvider形式に変換
           return {
             ...client,
-            on: (_event: string, _callback: (...args: unknown[]) => void) => client as unknown as EthereumProvider,
-            removeListener: (_event: string, _callback: (...args: unknown[]) => void) => client as unknown as EthereumProvider,
+            on: (_event: string, _callback: (...args: unknown[]) => void) =>
+              client as unknown as EthereumProvider,
+            removeListener: (_event: string, _callback: (...args: unknown[]) => void) =>
+              client as unknown as EthereumProvider,
           } as unknown as EthereumProvider;
         }
 
@@ -406,7 +408,8 @@ export const useNexusBalance = () => {
   // walletClientの準備状況を監視
   useEffect(() => {
     const clientToUse = walletClient || connectorClient;
-    const windowEthereum = typeof window !== 'undefined' ? !!(window as WindowWithEthereum).ethereum : false;
+    const windowEthereum =
+      typeof window !== 'undefined' ? !!(window as WindowWithEthereum).ethereum : false;
 
     // window.ethereumが利用可能な場合も準備完了とする
     if ((clientToUse || windowEthereum) && isConnected && address) {
