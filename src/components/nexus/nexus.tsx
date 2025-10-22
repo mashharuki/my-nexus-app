@@ -1,13 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { Button } from '@/components/atoms/Button';
 import { Card, CardContent } from '@/components/atoms/Card';
 import { useWeb3Context } from '@/providers/Web3Provider';
+import BridgeDialog from './BridgeDialog';
 
 const Nexus = () => {
   const { isConnected } = useAccount();
   const { network } = useWeb3Context();
+  const [isBridgeDialogOpen, setIsBridgeDialogOpen] = useState(false);
 
   return (
     <Card className="border-none shadow-none">
@@ -25,6 +28,7 @@ const Nexus = () => {
               <h3 className="text-lg font-semibold mb-4">Bridge Tokens</h3>
               <Button
                 disabled={!isConnected}
+                onClick={() => setIsBridgeDialogOpen(true)}
                 className="w-full font-bold rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
               >
                 {isConnected ? 'Bridge Tokens' : 'Connect Wallet First'}
@@ -62,6 +66,9 @@ const Nexus = () => {
           </div>
         </div>
       </CardContent>
+
+      {/* Bridge Dialog */}
+      <BridgeDialog isOpen={isBridgeDialogOpen} onOpenChange={setIsBridgeDialogOpen} />
     </Card>
   );
 };

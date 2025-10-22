@@ -3,7 +3,8 @@ import { Button } from '@/components/atoms/Button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/atoms/Card';
 import { ArrowRight, Globe, Shield, Zap, Users, TrendingUp, Sparkles, Coins } from 'lucide-react';
 import { mockProjects } from '@/mockdatas';
-
+import ViewUnifiedBalance from '@/components/nexus/ViewUnifiedBalance';
+import Nexus from '@/components/nexus/nexus';
 /**
  * CrossDonate Homepage - Exact V0 Design Replica
  * @returns
@@ -82,19 +83,17 @@ export default function HomePage() {
       </section>
 
       {/* Nexus SDK Demo Section - Enhanced */}
-      {/* <section className="py-20 bg-muted">
+      <section className="py-20 bg-muted">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-foreground mb-4">
-                Nexus SDK デモ
-              </h2>
+              <h2 className="text-4xl font-bold text-foreground mb-4">Nexus SDK デモ</h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 Nexus SDKを使用したクロスチェーン機能を体験してください。
                 統一されたアドレスで複数のブロックチェーンから寄付を受け付けます。
               </p>
             </div>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <Card className="border-0 shadow-xl gradient-card glass-effect">
                 <CardContent className="p-8">
@@ -102,7 +101,7 @@ export default function HomePage() {
                   <ViewUnifiedBalance />
                 </CardContent>
               </Card>
-              
+
               <Card className="border-0 shadow-xl gradient-card glass-effect">
                 <CardContent className="p-8">
                   <h3 className="text-2xl font-bold text-foreground mb-6">クロスチェーン操作</h3>
@@ -112,7 +111,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </section> */}
+      </section>
 
       {/* Features Section - V0 Style */}
       <section className="py-24 px-4 bg-secondary/30">
