@@ -6,13 +6,13 @@ import { getDefaultConfig, lightTheme, RainbowKitProvider } from '@rainbow-me/ra
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { WagmiProvider } from 'wagmi';
-import { arbitrumSepolia, baseSepolia, optimismSepolia, polygonAmoy, sepolia } from 'wagmi/chains';
+import { mainnet, arbitrum, base, optimism, polygon } from 'wagmi/chains';
 import { initializeAnalyticsSuppression } from '@/utils/analyticsSuppressor';
 
 const walletConnectProjectId =
   process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id';
 
-const defaultNetwork = (process.env.NEXT_PUBLIC_NETWORK ?? 'testnet') as NexusNetwork;
+const defaultNetwork = (process.env.NEXT_PUBLIC_NETWORK ?? 'mainnet') as NexusNetwork;
 
 if (!process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID) {
   console.warn('NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not set. Using demo project ID.');
@@ -21,7 +21,7 @@ if (!process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID) {
 const config = getDefaultConfig({
   appName: 'Nexus Sample App',
   projectId: walletConnectProjectId,
-  chains: [sepolia, baseSepolia, arbitrumSepolia, optimismSepolia, polygonAmoy],
+  chains: [mainnet, base, arbitrum, optimism, polygon],
   ssr: false,
   batch: {
     multicall: false,
@@ -86,7 +86,7 @@ const Web3Provider = ({ children }: { children: React.ReactNode }) => {
               appName: 'CrossDonate',
               learnMoreUrl: undefined,
             }}
-            initialChain={sepolia}
+            initialChain={mainnet}
           >
             <NexusProvider config={{ network }}>{children}</NexusProvider>
           </RainbowKitProvider>

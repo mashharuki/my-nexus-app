@@ -5,7 +5,7 @@ import type { EthereumProvider, WindowWithEthereum } from '@/types';
 
 // Nexus SDKのインスタンスを作成
 const nexusSDK = new NexusSDK({
-  network: 'testnet',
+  network: 'mainnet',
   debug: true,
 });
 
