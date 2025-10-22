@@ -3,9 +3,12 @@ import { useEffect, useState } from 'react';
 import { useAccount, useWalletClient, useConnectorClient } from 'wagmi';
 import type { EthereumProvider, WindowWithEthereum } from '@/types';
 
+// 環境変数からネットワーク設定を取得
+const networkMode = (process.env.NEXT_PUBLIC_NETWORK ?? 'testnet') as 'mainnet' | 'testnet';
+
 // Nexus SDKのインスタンスを作成
 const nexusSDK = new NexusSDK({
-  network: 'mainnet',
+  network: networkMode,
   debug: true,
 });
 

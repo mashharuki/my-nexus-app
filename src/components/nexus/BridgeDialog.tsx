@@ -20,8 +20,12 @@ interface BridgeDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const SUPPORTED_TOKENS = ['ETH', 'USDC', 'USDT'] as const;
-const SUPPORTED_CHAINS = [
+// メインネットとテストネットで利用可能なトークンを分ける
+const MAINNET_TOKENS = ['ETH', 'USDC', 'USDT'] as const;
+const TESTNET_TOKENS = ['ETH'] as const;
+
+// メインネットチェーン
+const MAINNET_CHAINS = [
   { id: 1, name: 'Ethereum' },
   { id: 10, name: 'Optimism' },
   { id: 137, name: 'Polygon' },
@@ -32,22 +36,38 @@ const SUPPORTED_CHAINS = [
   { id: 56, name: 'BNB Chain' },
 ] as const;
 
+// テストネットチェーン（Nexus SDK公式サポートチェーン）
+const TESTNET_CHAINS = [
+  { id: 11155111, name: 'Sepolia' },
+  { id: 84532, name: 'Base Sepolia' },
+  { id: 421614, name: 'Arbitrum Sepolia' },
+  { id: 11155420, name: 'Optimism Sepolia' },
+  { id: 80002, name: 'Polygon Amoy' },
+  { id: 10143, name: 'Monad Testnet' },
+] as const;
+
 export default function BridgeDialog({ isOpen, onOpenChange }: BridgeDialogProps) {
   const { address, isConnected } = useAccount();
   const { nexusSDK, isInitialized, initializeSDK } = useNexusSDK();
-  
+
   // ユニークなIDを生成
   const tokenId = useId();
   const amountId = useId();
   const targetChainId = useId();
- 
-  const [token, setToken] = useState<(typeof SUPPORTED_TOKENS)[number]>('USDC');
+  const networkModeId = useId();
+
+  const [token, setToken] = useState<'ETH' | 'USDC' | 'USDT'>('ETH');
   const [amount, setAmount] = useState('');
   const [targetChain, setTargetChain] = useState<SUPPORTED_CHAINS_IDS>(137);
+  const [networkMode, setNetworkMode] = useState<'mainnet' | 'testnet'>('mainnet');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(false);
+
+  // 現在のネットワークモードに応じてチェーンリストとトークンリストを取得
+  const currentChains = networkMode === 'mainnet' ? MAINNET_CHAINS : TESTNET_CHAINS;
+  const currentTokens = networkMode === 'mainnet' ? MAINNET_TOKENS : TESTNET_TOKENS;
 
   const handleInitializeSDK = async () => {
     if (!isConnected || !address) {
@@ -85,6 +105,15 @@ export default function BridgeDialog({ isOpen, onOpenChange }: BridgeDialogProps
         await initializeSDK();
       }
 
+      // デバッグ情報を表示
+      console.log('Bridge parameters:', {
+        token,
+        amount: parseFloat(amount),
+        chainId: targetChain,
+        networkMode,
+        isInitialized,
+      });
+
       // ブリッジを実行
       const result = await nexusSDK.bridge({
         token,
@@ -118,6 +147,21 @@ export default function BridgeDialog({ isOpen, onOpenChange }: BridgeDialogProps
     setAmount('');
   };
 
+  // ネットワークモードが変更された時にデフォルトチェーンとトークンを設定
+  const handleNetworkModeChange = (mode: 'mainnet' | 'testnet') => {
+    setNetworkMode(mode);
+    // デフォルトチェーンを設定
+    const defaultChain = mode === 'mainnet' ? 137 : 11155111; // Polygon or Sepolia
+    setTargetChain(defaultChain as SUPPORTED_CHAINS_IDS);
+    // テストネットではETHのみ利用可能
+    if (mode === 'testnet') {
+      setToken('ETH');
+    }
+    // エラーと成功メッセージをクリア
+    setError(null);
+    setSuccess(null);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
@@ -129,16 +173,88 @@ export default function BridgeDialog({ isOpen, onOpenChange }: BridgeDialogProps
         </DialogHeader>
 
         <div className="space-y-6 mt-6">
+          {/* ネットワークモード選択 */}
+          <div className="space-y-2">
+            <Label htmlFor={networkModeId}>ネットワーク</Label>
+            <div className="flex gap-2">
+              <Button
+                variant={networkMode === 'mainnet' ? 'default' : 'outline'}
+                onClick={() => handleNetworkModeChange('mainnet')}
+                className="flex-1"
+              >
+                メインネット
+              </Button>
+              <Button
+                variant={networkMode === 'testnet' ? 'default' : 'outline'}
+                onClick={() => handleNetworkModeChange('testnet')}
+                className="flex-1"
+              >
+                テストネット
+              </Button>
+            </div>
+            <p className="text-xs text-gray-500">
+              {networkMode === 'mainnet'
+                ? '本番環境のチェーンでブリッジを実行します'
+                : 'テスト環境のチェーンでブリッジを実行します（テスト用トークンが必要）'}
+            </p>
+            {networkMode === 'testnet' && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-blue-700 text-xs font-medium mb-1">テストネットの使い方:</p>
+                <ul className="text-blue-600 text-xs space-y-1">
+                  <li>
+                    • Sepolia:{' '}
+                    <a
+                      href="https://sepoliafaucet.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                    >
+                      Sepolia Faucet
+                    </a>{' '}
+                    でテストETHを取得
+                  </li>
+                  <li>
+                    • Base Sepolia:{' '}
+                    <a
+                      href="https://bridge.base.org/deposit"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                    >
+                      Base Bridge
+                    </a>{' '}
+                    でテストトークンを取得
+                  </li>
+                  <li>
+                    • Polygon Amoy:{' '}
+                    <a
+                      href="https://faucet.polygon.technology/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                    >
+                      Polygon Faucet
+                    </a>{' '}
+                    でテストMATICを取得
+                  </li>
+                </ul>
+                <p className="text-blue-700 text-xs font-medium mt-2">
+                  注意: テストネットではETHのみブリッジ可能です
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* トークン選択 */}
           <div className="space-y-2">
             <Label htmlFor={tokenId}>トークン</Label>
             <select
               id={tokenId}
               value={token}
-              onChange={(e) => setToken(e.target.value as (typeof SUPPORTED_TOKENS)[number])}
+              onChange={(e) => setToken(e.target.value as 'ETH' | 'USDC' | 'USDT')}
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              {SUPPORTED_TOKENS.map((t) => (
+              {currentTokens.map((t) => (
                 <option key={t} value={t}>
                   {t}
                 </option>
@@ -169,7 +285,7 @@ export default function BridgeDialog({ isOpen, onOpenChange }: BridgeDialogProps
               onChange={(e) => setTargetChain(Number(e.target.value) as SUPPORTED_CHAINS_IDS)}
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              {SUPPORTED_CHAINS.map((chain) => (
+              {currentChains.map((chain) => (
                 <option key={chain.id} value={chain.id}>
                   {chain.name} (Chain ID: {chain.id})
                 </option>
@@ -227,6 +343,7 @@ export default function BridgeDialog({ isOpen, onOpenChange }: BridgeDialogProps
               ウォレット: {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '未接続'}
             </p>
             <p>接続状態: {isConnected ? '接続済み' : '未接続'}</p>
+            <p>ネットワーク: {networkMode === 'mainnet' ? 'メインネット' : 'テストネット'}</p>
             <p>SDK状態: {isInitialized ? '初期化済み' : '未初期化'}</p>
             <p>数量入力: {amount ? `${amount} ${token}` : '未入力'}</p>
             <p>
