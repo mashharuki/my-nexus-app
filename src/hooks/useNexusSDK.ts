@@ -57,10 +57,12 @@ export function useNexusSDK() {
       setIsSDKInitializing(true);
 
       try {
+        console.log('Nexus SDK初期化開始...');
         const clientToUse = await getWalletClient();
         if (!clientToUse) {
           throw new Error('No wallet client available for initialization');
         }
+        console.log('ウォレットクライアント取得成功:', clientToUse);
 
         let ethereumProvider: EthereumProvider;
 
@@ -88,9 +90,14 @@ export function useNexusSDK() {
           };
         }
 
+        console.log('Nexus SDK初期化実行中...');
         await nexusSDK.initialize(ethereumProvider);
+        console.log('Nexus SDK初期化完了');
         setIsInitialized(true);
         setLastConnectedAddress(address);
+      } catch (error) {
+        console.error('Nexus SDK初期化エラー:', error);
+        setIsInitialized(false);
       } finally {
         // SDK初期化完了を通知
         setIsSDKInitializing(false);
@@ -106,6 +113,7 @@ export function useNexusSDK() {
       setIsInitialized(false);
       setLastConnectedAddress(null);
     }
+    // 自動初期化は削除 - 手動で初期化を制御する
   }, [isConnected, address]);
 
   return {

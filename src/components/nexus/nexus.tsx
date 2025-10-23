@@ -6,11 +6,14 @@ import { Button } from '@/components/atoms/Button';
 import { Card, CardContent } from '@/components/atoms/Card';
 import { useWeb3Context } from '@/providers/Web3Provider';
 import BridgeDialog from './BridgeDialog';
+import BridgeAndExecuteTest from './BridgeAndExecuteTest';
 
 const Nexus = () => {
   const { isConnected } = useAccount();
   const { network } = useWeb3Context();
   const [isBridgeDialogOpen, setIsBridgeDialogOpen] = useState(false);
+  const [isBridgeAndExecuteOpen, setIsBridgeAndExecuteOpen] = useState(false);
+  const [selectedToken, setSelectedToken] = useState<'USDT' | 'USDC' | null>(null);
 
   return (
     <Card className="border-none shadow-none">
@@ -49,6 +52,10 @@ const Nexus = () => {
               <h3 className="text-lg font-semibold mb-4">Bridge & Supply USDT on AAVE</h3>
               <Button
                 disabled={!isConnected}
+                onClick={() => {
+                  setSelectedToken('USDT');
+                  setIsBridgeAndExecuteOpen(true);
+                }}
                 className="w-full font-bold rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
               >
                 {isConnected ? 'Bridge & Supply USDT' : 'Connect Wallet First'}
@@ -58,6 +65,10 @@ const Nexus = () => {
               <h3 className="text-lg font-semibold mb-4">Bridge & Supply USDC on AAVE</h3>
               <Button
                 disabled={!isConnected}
+                onClick={() => {
+                  setSelectedToken('USDC');
+                  setIsBridgeAndExecuteOpen(true);
+                }}
                 className="w-full font-bold rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
               >
                 {isConnected ? 'Bridge & Supply USDC' : 'Connect Wallet First'}
@@ -65,6 +76,19 @@ const Nexus = () => {
             </div>
           </div>
         </div>
+
+        {/* Bridge & Execute Test Component - Conditional Display */}
+        {isBridgeAndExecuteOpen && (
+          <div className="mt-8">
+            <BridgeAndExecuteTest
+              onClose={() => {
+                setIsBridgeAndExecuteOpen(false);
+                setSelectedToken(null);
+              }}
+              selectedToken={selectedToken}
+            />
+          </div>
+        )}
       </CardContent>
 
       {/* Bridge Dialog */}
