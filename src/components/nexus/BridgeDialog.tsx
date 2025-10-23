@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useId } from 'react';
+import { useState, useId, useEffect, useCallback } from 'react';
 import { Button } from '@/components/atoms/Button';
 import {
   Dialog,
@@ -69,14 +69,21 @@ export default function BridgeDialog({ isOpen, onOpenChange }: BridgeDialogProps
   const currentChains = networkMode === 'mainnet' ? MAINNET_CHAINS : TESTNET_CHAINS;
   const currentTokens = networkMode === 'mainnet' ? MAINNET_TOKENS : TESTNET_TOKENS;
 
-  const handleInitializeSDK = async () => {
+  // SDK初期化処理
+  const handleInitializeSDK = useCallback(async () => {
     if (!isConnected || !address) {
       setError('ウォレットが接続されていません。');
       return;
     }
 
+    if (isInitializing) {
+      console.log('BridgeDialog: 既に初期化中です。');
+      return;
+    }
+
     setIsInitializing(true);
     setError(null);
+    setSuccess(null);
 
     try {
       await initializeSDK();
@@ -87,11 +94,23 @@ export default function BridgeDialog({ isOpen, onOpenChange }: BridgeDialogProps
     } finally {
       setIsInitializing(false);
     }
-  };
+  }, [isConnected, address, isInitializing, initializeSDK]);
+
+  // ダイアログが開かれた時のみSDK初期化を自動実行
+  useEffect(() => {
+    if (isOpen && isConnected && !isInitialized && !isInitializing) {
+      handleInitializeSDK();
+    }
+  }, [isOpen, isConnected, isInitialized, isInitializing, handleInitializeSDK]);
 
   const handleBridge = async () => {
     if (!amount || parseFloat(amount) <= 0) {
       setError('有効な数量を入力してください。');
+      return;
+    }
+
+    if (!isConnected || !address) {
+      setError('ウォレットが接続されていません。');
       return;
     }
 
@@ -100,19 +119,23 @@ export default function BridgeDialog({ isOpen, onOpenChange }: BridgeDialogProps
     setSuccess(null);
 
     try {
-      // SDKが初期化されていない場合は初期化を試行
+      // SDKが初期化されていない場合は自動初期化を実行
       if (!isInitialized) {
-        await initializeSDK();
-      }
+        setSuccess('Nexus SDKを初期化中...');
+        try {
+          await initializeSDK();
+          setSuccess('Nexus SDKの初期化が完了しました。ブリッジを開始します...');
 
-      // デバッグ情報を表示
-      console.log('Bridge parameters:', {
-        token,
-        amount: parseFloat(amount),
-        chainId: targetChain,
-        networkMode,
-        isInitialized,
-      });
+          // 初期化完了後、少し待機してからブリッジ処理を続行
+          await new Promise((resolve) => setTimeout(resolve, 200));
+        } catch (initError) {
+          console.error('SDK初期化エラー:', initError);
+          setError(
+            `SDK初期化に失敗しました: ${initError instanceof Error ? initError.message : '不明なエラー'}`
+          );
+          return;
+        }
+      }
 
       // ブリッジを実行
       const result = await nexusSDK.bridge({
@@ -157,22 +180,27 @@ export default function BridgeDialog({ isOpen, onOpenChange }: BridgeDialogProps
     if (mode === 'testnet') {
       setToken('ETH');
     }
-    // エラーと成功メッセージをクリア
+    // エラーメッセージのみクリア（成功メッセージは保持）
     setError(null);
-    setSuccess(null);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">トークンブリッジ</DialogTitle>
           <DialogDescription>
             Nexus SDKを使用してトークンを異なるチェーン間でブリッジします。
           </DialogDescription>
+          {/* 成功メッセージを説明文の真下に表示 */}
+          {success && (
+            <div className="p-3 bg-green-50 border border-green-200 rounded-md mt-1">
+              <p className="text-green-700 text-sm">{success}</p>
+            </div>
+          )}
         </DialogHeader>
 
-        <div className="space-y-6 mt-6">
+        <div className="space-y-6 mt-2">
           {/* ネットワークモード選択 */}
           <div className="space-y-2">
             <Label htmlFor={networkModeId}>ネットワーク</Label>
@@ -198,49 +226,8 @@ export default function BridgeDialog({ isOpen, onOpenChange }: BridgeDialogProps
                 : 'テスト環境のチェーンでブリッジを実行します（テスト用トークンが必要）'}
             </p>
             {networkMode === 'testnet' && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                <p className="text-blue-700 text-xs font-medium mb-1">テストネットの使い方:</p>
-                <ul className="text-blue-600 text-xs space-y-1">
-                  <li>
-                    • Sepolia:{' '}
-                    <a
-                      href="https://sepoliafaucet.com/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline"
-                    >
-                      Sepolia Faucet
-                    </a>{' '}
-                    でテストETHを取得
-                  </li>
-                  <li>
-                    • Base Sepolia:{' '}
-                    <a
-                      href="https://bridge.base.org/deposit"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline"
-                    >
-                      Base Bridge
-                    </a>{' '}
-                    でテストトークンを取得
-                  </li>
-                  <li>
-                    • Polygon Amoy:{' '}
-                    <a
-                      href="https://faucet.polygon.technology/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline"
-                    >
-                      Polygon Faucet
-                    </a>{' '}
-                    でテストMATICを取得
-                  </li>
-                </ul>
-                <p className="text-blue-700 text-xs font-medium mt-2">
-                  注意: テストネットではETHのみブリッジ可能です
-                </p>
+              <div className="p-2 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-blue-700 text-xs">テストネットではETHのみブリッジ可能です。</p>
               </div>
             )}
           </div>
@@ -300,26 +287,12 @@ export default function BridgeDialog({ isOpen, onOpenChange }: BridgeDialogProps
             </div>
           )}
 
-          {/* 成功表示 */}
-          {success && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-              <p className="text-green-700 text-sm">{success}</p>
-            </div>
-          )}
-
-          {/* SDK初期化ボタン（必要に応じて） */}
+          {/* SDK初期化状態の表示 */}
           {!isInitialized && (
-            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-              <p className="text-yellow-700 text-sm mb-2">
-                Nexus SDKが初期化されていません。まず初期化を行ってください。
+            <div className="p-2 bg-blue-50 border border-blue-200 rounded-md">
+              <p className="text-blue-700 text-xs">
+                SDKが未初期化です。ブリッジ実行時に自動初期化されます。
               </p>
-              <Button
-                onClick={handleInitializeSDK}
-                disabled={isInitializing || !isConnected}
-                className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
-              >
-                {isInitializing ? '初期化中...' : 'SDK初期化'}
-              </Button>
             </div>
           )}
 
@@ -327,33 +300,22 @@ export default function BridgeDialog({ isOpen, onOpenChange }: BridgeDialogProps
           <div className="flex gap-3 pt-4">
             <Button
               onClick={handleBridge}
-              disabled={isLoading || !amount || parseFloat(amount) <= 0}
+              disabled={isLoading || !amount || parseFloat(amount) <= 0 || !isConnected}
               className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
             >
-              {isLoading ? 'ブリッジ中...' : 'ブリッジ実行'}
+              {isLoading
+                ? isInitialized
+                  ? 'ブリッジ中...'
+                  : 'SDK初期化中...'
+                : !isConnected
+                  ? 'ウォレット未接続'
+                  : !amount || parseFloat(amount) <= 0
+                    ? '数量を入力してください'
+                    : 'ブリッジ実行'}
             </Button>
             <Button onClick={handleClose} variant="outline" className="flex-1">
               キャンセル
             </Button>
-          </div>
-
-          {/* ステータス情報 */}
-          <div className="text-xs text-gray-500 space-y-1">
-            <p>
-              ウォレット: {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '未接続'}
-            </p>
-            <p>接続状態: {isConnected ? '接続済み' : '未接続'}</p>
-            <p>ネットワーク: {networkMode === 'mainnet' ? 'メインネット' : 'テストネット'}</p>
-            <p>SDK状態: {isInitialized ? '初期化済み' : '未初期化'}</p>
-            <p>数量入力: {amount ? `${amount} ${token}` : '未入力'}</p>
-            <p>
-              ボタン状態:{' '}
-              {isLoading
-                ? 'ローディング中'
-                : !amount || parseFloat(amount) <= 0
-                  ? '数量未入力'
-                  : '実行可能'}
-            </p>
           </div>
         </div>
       </DialogContent>

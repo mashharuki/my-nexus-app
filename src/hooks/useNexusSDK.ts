@@ -1,5 +1,5 @@
 import { NexusSDK } from '@avail-project/nexus-core';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAccount, useWalletClient, useConnectorClient } from 'wagmi';
 import { useSDKInitialization } from '@/contexts/SDKInitializationContext';
 import type { EthereumProvider, WindowWithEthereum } from '@/types';
@@ -20,6 +20,17 @@ export function useNexusSDK() {
   const { setIsSDKInitializing } = useSDKInitialization();
   const [isInitialized, setIsInitialized] = useState(false);
   const [lastConnectedAddress, setLastConnectedAddress] = useState<string | null>(null);
+
+  // 状態更新関数を安定化
+  const updateInitializedState = useCallback((value: boolean) => {
+    console.log('updateInitializedState called with:', value);
+    setIsInitialized(value);
+  }, []);
+
+  const updateLastConnectedAddress = useCallback((value: string | null) => {
+    console.log('updateLastConnectedAddress called with:', value);
+    setLastConnectedAddress(value);
+  }, []);
 
   // ウォレットクライアントを取得する関数（シンプル版）
   const getWalletClient = async (): Promise<EthereumProvider | null> => {
@@ -43,10 +54,10 @@ export function useNexusSDK() {
     return null;
   };
 
-  // SDK初期化（シンプル版）
-  const initializeSDK = async (): Promise<boolean> => {
+  // SDK初期化
+  const initializeSDK = async (): Promise<void> => {
     if (!isConnected || !address) {
-      return false;
+      throw new Error('ウォレットが接続されていません');
     }
 
     // アドレスが変更された場合、Nexus SDKを再初期化
@@ -57,12 +68,10 @@ export function useNexusSDK() {
       setIsSDKInitializing(true);
 
       try {
-        console.log('Nexus SDK初期化開始...');
         const clientToUse = await getWalletClient();
         if (!clientToUse) {
-          throw new Error('No wallet client available for initialization');
+          throw new Error('ウォレットクライアントが利用できません');
         }
-        console.log('ウォレットクライアント取得成功:', clientToUse);
 
         let ethereumProvider: EthereumProvider;
 
@@ -90,31 +99,38 @@ export function useNexusSDK() {
           };
         }
 
-        console.log('Nexus SDK初期化実行中...');
         await nexusSDK.initialize(ethereumProvider);
-        console.log('Nexus SDK初期化完了');
-        setIsInitialized(true);
-        setLastConnectedAddress(address);
+
+        // 状態を更新
+        updateInitializedState(true);
+        updateLastConnectedAddress(address);
       } catch (error) {
         console.error('Nexus SDK初期化エラー:', error);
         setIsInitialized(false);
+        throw error; // エラーを再投げして呼び出し元で処理できるようにする
       } finally {
         // SDK初期化完了を通知
         setIsSDKInitializing(false);
       }
     }
-
-    return true;
   };
 
   // ウォレット接続状態の変化を監視
   useEffect(() => {
     if (!isConnected || !address) {
-      setIsInitialized(false);
-      setLastConnectedAddress(null);
+      updateInitializedState(false);
+      updateLastConnectedAddress(null);
+    } else if (address && lastConnectedAddress && address !== lastConnectedAddress) {
+      updateInitializedState(false);
+      updateLastConnectedAddress(null);
     }
-    // 自動初期化は削除 - 手動で初期化を制御する
-  }, [isConnected, address]);
+  }, [
+    isConnected,
+    address,
+    lastConnectedAddress,
+    updateInitializedState,
+    updateLastConnectedAddress,
+  ]);
 
   return {
     nexusSDK,
