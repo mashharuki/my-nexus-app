@@ -1,6 +1,7 @@
 import { NexusSDK } from '@avail-project/nexus-core';
 import { useEffect, useState } from 'react';
 import { useAccount, useWalletClient, useConnectorClient } from 'wagmi';
+import { useSDKInitialization } from '@/contexts/SDKInitializationContext';
 import type { EthereumProvider, WindowWithEthereum } from '@/types';
 
 // 環境変数からネットワーク設定を取得
@@ -16,35 +17,25 @@ export function useNexusSDK() {
   const { address, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
   const { data: connectorClient } = useConnectorClient();
+  const { setIsSDKInitializing } = useSDKInitialization();
   const [isInitialized, setIsInitialized] = useState(false);
   const [lastConnectedAddress, setLastConnectedAddress] = useState<string | null>(null);
 
-  // ウォレットクライアントを取得する関数
+  // ウォレットクライアントを取得する関数（シンプル版）
   const getWalletClient = async (): Promise<EthereumProvider | null> => {
-    let attempts = 0;
-    const maxAttempts = 30; // 3秒間待機
-
-    while (attempts < maxAttempts) {
-      const client = walletClient || connectorClient;
-      if (client) {
-        return {
-          ...client,
-          on: (_event: string, _callback: (...args: unknown[]) => void) =>
-            client as unknown as EthereumProvider,
-          removeListener: (_event: string, _callback: (...args: unknown[]) => void) =>
-            client as unknown as EthereumProvider,
-        } as unknown as EthereumProvider;
-      }
-
-      // window.ethereumに直接アクセスを試行
-      if (typeof window !== 'undefined' && (window as WindowWithEthereum).ethereum) {
-        return (window as WindowWithEthereum).ethereum as EthereumProvider;
-      }
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      attempts++;
+    // まずwagmiのクライアントを試行
+    const client = walletClient || connectorClient;
+    if (client) {
+      return {
+        ...client,
+        on: (_event: string, _callback: (...args: unknown[]) => void) =>
+          client as unknown as EthereumProvider,
+        removeListener: (_event: string, _callback: (...args: unknown[]) => void) =>
+          client as unknown as EthereumProvider,
+      } as unknown as EthereumProvider;
     }
 
-    // 最後の手段としてwindow.ethereumを返す
+    // window.ethereumに直接アクセス
     if (typeof window !== 'undefined' && (window as WindowWithEthereum).ethereum) {
       return (window as WindowWithEthereum).ethereum as EthereumProvider;
     }
@@ -52,7 +43,7 @@ export function useNexusSDK() {
     return null;
   };
 
-  // SDK初期化
+  // SDK初期化（シンプル版）
   const initializeSDK = async (): Promise<boolean> => {
     if (!isConnected || !address) {
       return false;
@@ -62,40 +53,48 @@ export function useNexusSDK() {
     const shouldReinitialize = !isInitialized || lastConnectedAddress !== address;
 
     if (shouldReinitialize) {
-      const clientToUse = await getWalletClient();
-      if (!clientToUse) {
-        throw new Error('No wallet client available for initialization');
+      // SDK初期化開始を通知
+      setIsSDKInitializing(true);
+
+      try {
+        const clientToUse = await getWalletClient();
+        if (!clientToUse) {
+          throw new Error('No wallet client available for initialization');
+        }
+
+        let ethereumProvider: EthereumProvider;
+
+        if (clientToUse === (window as WindowWithEthereum).ethereum) {
+          ethereumProvider = {
+            ...clientToUse,
+            request: clientToUse.request.bind(clientToUse) as EthereumProvider['request'],
+            on: (_event: string, _callback: (...args: unknown[]) => void) => {
+              return ethereumProvider;
+            },
+            removeListener: (_event: string, _callback: (...args: unknown[]) => void) => {
+              return ethereumProvider;
+            },
+          };
+        } else {
+          ethereumProvider = {
+            ...clientToUse,
+            request: clientToUse.request.bind(clientToUse) as EthereumProvider['request'],
+            on: (_event: string, _callback: (...args: unknown[]) => void) => {
+              return ethereumProvider;
+            },
+            removeListener: (_event: string, _callback: (...args: unknown[]) => void) => {
+              return ethereumProvider;
+            },
+          };
+        }
+
+        await nexusSDK.initialize(ethereumProvider);
+        setIsInitialized(true);
+        setLastConnectedAddress(address);
+      } finally {
+        // SDK初期化完了を通知
+        setIsSDKInitializing(false);
       }
-
-      let ethereumProvider: EthereumProvider;
-
-      if (clientToUse === (window as WindowWithEthereum).ethereum) {
-        ethereumProvider = {
-          ...clientToUse,
-          request: clientToUse.request.bind(clientToUse) as EthereumProvider['request'],
-          on: (_event: string, _callback: (...args: unknown[]) => void) => {
-            return ethereumProvider;
-          },
-          removeListener: (_event: string, _callback: (...args: unknown[]) => void) => {
-            return ethereumProvider;
-          },
-        };
-      } else {
-        ethereumProvider = {
-          ...clientToUse,
-          request: clientToUse.request.bind(clientToUse) as EthereumProvider['request'],
-          on: (_event: string, _callback: (...args: unknown[]) => void) => {
-            return ethereumProvider;
-          },
-          removeListener: (_event: string, _callback: (...args: unknown[]) => void) => {
-            return ethereumProvider;
-          },
-        };
-      }
-
-      await nexusSDK.initialize(ethereumProvider);
-      setIsInitialized(true);
-      setLastConnectedAddress(address);
     }
 
     return true;
