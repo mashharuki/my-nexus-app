@@ -3,7 +3,6 @@
 import { useState, useEffect, useId, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import { Button } from '@/components/atoms/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/Card';
 import { Input } from '@/components/atoms/Input';
 import { Label } from '@/components/atoms/Label';
 import { useNexusSDK } from '@/hooks/useNexusSDK';
@@ -16,13 +15,11 @@ import type {
 
 interface BridgeAndExecuteTestProps {
   className?: string;
-  onClose?: () => void;
   selectedToken?: 'USDT' | 'USDC' | null;
 }
 
 export default function BridgeAndExecuteTest({
   className,
-  onClose,
   selectedToken,
 }: BridgeAndExecuteTestProps) {
   const { isConnected, address } = useAccount();
@@ -216,21 +213,8 @@ export default function BridgeAndExecuteTest({
   };
 
   return (
-    <Card className={className}>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Bridge & Execute テスト</CardTitle>
-        {onClose && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            ✕
-          </Button>
-        )}
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className={className}>
+      <div className="space-y-4">
         {!isConnected && (
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-yellow-800">ウォレットを接続してください</p>
@@ -461,7 +445,7 @@ export default function BridgeAndExecuteTest({
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

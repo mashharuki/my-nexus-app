@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/atoms/Card';
 import { useWeb3Context } from '@/providers/Web3Provider';
 import BridgeDialog from './BridgeDialog';
 import BridgeAndExecuteTest from './BridgeAndExecuteTest';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/atoms/Dialog';
 
 const Nexus = () => {
   const { isConnected } = useAccount();
@@ -77,18 +78,19 @@ const Nexus = () => {
           </div>
         </div>
 
-        {/* Bridge & Execute Test Component - Conditional Display */}
-        {isBridgeAndExecuteOpen && (
-          <div className="mt-8">
-            <BridgeAndExecuteTest
-              onClose={() => {
-                setIsBridgeAndExecuteOpen(false);
-                setSelectedToken(null);
-              }}
-              selectedToken={selectedToken}
-            />
-          </div>
-        )}
+        {/* Bridge & Execute Test Modal */}
+        <Dialog open={isBridgeAndExecuteOpen} onOpenChange={setIsBridgeAndExecuteOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {selectedToken
+                  ? `${selectedToken} Bridge & Execute テスト`
+                  : 'Bridge & Execute テスト'}
+              </DialogTitle>
+            </DialogHeader>
+            <BridgeAndExecuteTest selectedToken={selectedToken} />
+          </DialogContent>
+        </Dialog>
       </CardContent>
 
       {/* Bridge Dialog */}
