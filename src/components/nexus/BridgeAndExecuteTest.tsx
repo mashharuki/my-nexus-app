@@ -128,7 +128,8 @@ export default function BridgeAndExecuteTest({
             const tokenOut = "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0" // USDT address on Ethereum Sepolia
             const fee = 3000;
             const recipient = (formData.recipient || address) as `0x${string}`;
-            const amountOutMinimum = parseFloat(amount) * 1 ** decimals;
+            // 修正: 適切なスリッページ設定（5%）
+            const amountOutMinimum = Math.floor(parseFloat(amount) * 10 ** decimals * 0.95); // 5%のスリッページ許容
             const sqrtPriceLimitX96: 0 = 0;
             
             console.log({
@@ -168,7 +169,22 @@ export default function BridgeAndExecuteTest({
       console.log(simulationResult)
       setSimulation(simulationResult);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'シミュレーションに失敗しました');
+      console.error('Simulation error:', err);
+      let errorMessage = 'シミュレーションに失敗しました';
+      
+      if (err instanceof Error) {
+        errorMessage = err.message;
+        
+        // 特定のエラーメッセージに対する詳細説明を追加
+        if (err.message.includes('Execute-only operation failed')) {
+          errorMessage += '\n\n【シミュレーション結果】Execute-onlyオペレーションが失敗する可能性があります。パラメータを確認してください。';
+        }
+        if (err.message.includes('Transaction simulation failed')) {
+          errorMessage += '\n\n【シミュレーション結果】トランザクションシミュレーションが失敗しました。パラメータや流動性を確認してください。';
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -203,7 +219,8 @@ export default function BridgeAndExecuteTest({
             const tokenOut = "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0" // USDT address on Ethereum Sepolia
             const fee = 3000;
             const recipient = (formData.recipient || address) as `0x${string}`;
-            const amountOutMinimum = parseFloat(amount) * 1 ** decimals;
+            // 修正: 適切なスリッページ設定（5%）
+            const amountOutMinimum = Math.floor(parseFloat(amount) * 10 ** decimals * 0.95); // 5%のスリッページ許容
             const sqrtPriceLimitX96: 0 = 0;
             
             console.log({
@@ -233,7 +250,7 @@ export default function BridgeAndExecuteTest({
           },
           tokenApproval: {
             token: formData.token as 'USDC' | 'USDT' | 'ETH',
-            amount: formData.amount,
+            amount: (parseFloat(formData.amount) * 10 ** 6).toString(),
           },
         },
         waitForReceipt: true,
@@ -244,7 +261,28 @@ export default function BridgeAndExecuteTest({
       console.log(result)
       setResult(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '実行に失敗しました');
+      console.error('Bridge and Execute error:', err);
+      let errorMessage = '実行に失敗しました';
+      
+      if (err instanceof Error) {
+        errorMessage = err.message;
+        
+        // 特定のエラーメッセージに対する詳細説明を追加
+        if (err.message.includes('Execute-only operation failed')) {
+          errorMessage += '\n\n【原因】Execute-onlyオペレーションが失敗しました。ブリッジがスキップされ、実行フェーズのみが動作しましたが失敗しました。';
+        }
+        if (err.message.includes('Transaction simulation failed')) {
+          errorMessage += '\n\n【原因】トランザクションシミュレーションが失敗しました。スマートコントラクトの実行パラメータや流動性に問題がある可能性があります。';
+        }
+        if (err.message.includes('LOK')) {
+          errorMessage += '\n\n【原因】UniswapでのSwapが失敗しました。スリッページ設定、流動性、またはトークンペアに問題がある可能性があります。';
+        }
+        if (err.message.includes('bridgeSkipped: true')) {
+          errorMessage += '\n\n【情報】十分な資金が宛先チェーンに存在するため、ブリッジ処理はスキップされました。';
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -350,9 +388,10 @@ export default function BridgeAndExecuteTest({
               <p>
                 <strong>よく使用されるコントラクト例：</strong>
               </p>
+              <p>• Uniswap V3 Router (Sepolia): 0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E</p>
               <p>• Yearn USDC Vault: 0xa354F35829Ae975e850e23e9615b11Da1B3dC4DE</p>
               <p>• Aave USDC Pool: 0x98C23E9d8f34FEFb1B7BD6a91B7FF122F4e0F56e</p>
-              <p>• Compound USDC: 0xc3d688B66703497DAA19211EEdff47f25384cdc3</p>
+              <p className="text-orange-600">⚠️ testnet環境では流動性が限られています</p>
             </div>
           </div>
 
@@ -406,7 +445,22 @@ export default function BridgeAndExecuteTest({
 
         {error && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-800">エラー: {error}</p>
+            <div className="mb-2">
+              <p className="text-red-800 font-semibold">エラー詳細:</p>
+            </div>
+            <div className="text-red-700 text-sm whitespace-pre-line">
+              {error}
+            </div>
+            <div className="mt-3 p-3 bg-red-100 rounded border-l-4 border-red-400">
+              <p className="text-red-800 font-semibold text-xs">💡 解決のヒント:</p>
+              <ul className="text-red-700 text-xs mt-1 space-y-1">
+                <li>• スリッページ設定を確認してください（現在5%に設定済み）</li>
+                <li>• Sepolia testnetの流動性が十分かどうか確認してください</li>
+                <li>• より少ない金額でテストしてみてください</li>
+                <li>• 別のトークンペア（ETH/USDC）を試してみてください</li>
+                <li>• ガス価格が適切か確認してください</li>
+              </ul>
+            </div>
           </div>
         )}
 
