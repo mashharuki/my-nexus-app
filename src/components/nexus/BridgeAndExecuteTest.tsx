@@ -1,7 +1,5 @@
 'use client';
 
-import { useState, useEffect, useId, useCallback } from 'react';
-import { useAccount } from 'wagmi';
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
 import { Label } from '@/components/atoms/Label';
@@ -12,6 +10,8 @@ import type {
   BridgeAndExecuteResult,
   BridgeAndExecuteSimulationResult,
 } from '@avail-project/nexus-core';
+import { useCallback, useEffect, useId, useState } from 'react';
+import { useAccount } from 'wagmi';
 
 interface BridgeAndExecuteTestProps {
   className?: string;
@@ -30,10 +30,10 @@ export default function BridgeAndExecuteTest({
   // フォームの状態
   const [formData, setFormData] = useState({
     token: selectedToken || 'USDC',
-    amount: '100',
-    toChainId: '1', // Ethereum
-    sourceChains: '', // 現在のネットワークに設定
-    contractAddress: '0xa354F35829Ae975e850e23e9615b11Da1B3dC4DE', // Yearn USDC Vault
+    amount: '1',
+    toChainId: '11155111', // Ethereum
+    sourceChains: '84532', // 現在のネットワークに設定
+    contractAddress: '0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951', // Yearn USDC Vault
     functionName: 'deposit',
     recipient: '',
   });
@@ -146,6 +146,7 @@ export default function BridgeAndExecuteTest({
       };
 
       const simulationResult = await nexusSDK.simulateBridgeAndExecute(params);
+      console.log(simulationResult)
       setSimulation(simulationResult);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'シミュレーションに失敗しました');
@@ -204,6 +205,7 @@ export default function BridgeAndExecuteTest({
       };
 
       const result = await nexusSDK.bridgeAndExecute(params);
+      console.log(result)
       setResult(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : '実行に失敗しました');
