@@ -124,13 +124,14 @@ export default function BridgeAndExecuteTest({
           buildFunctionParams: (_token, amount, _chainId, userAddress) => {
             const tokenIn = "0x07865c6e87b9f70255377e024ace6630c1eaa37f" // USDC address on Ethereum Sepolia
             const decimals = 6; // USDC decimals
-            const amountWei = BigInt(parseFloat(amount) * 10 ** decimals);
+            const amountWei = parseFloat(amount) * 10 ** decimals;
             const tokenOut = "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0" // USDT address on Ethereum Sepolia
             const fee = 3000;
             const recipient = (formData.recipient || address) as `0x${string}`;
-            const amountOutMinimum = BigInt(parseFloat(amount) * 0.01 ** decimals);
+            const amountOutMinimum = parseFloat(amount) * 1 ** decimals;
             const sqrtPriceLimitX96: 0 = 0;
-            return {
+            
+            console.log({
               functionParams: [
                 tokenIn,
                 tokenOut,
@@ -139,6 +140,19 @@ export default function BridgeAndExecuteTest({
                 amountWei,
                 amountOutMinimum,
                 sqrtPriceLimitX96,
+              ],
+            });
+            return {
+              functionParams: [
+                {
+                  tokenIn: tokenIn,
+                  tokenOut: tokenOut,
+                  fee: fee,
+                  recipient: recipient,
+                  amountIn: amountWei,
+                  amountOutMinimum: amountOutMinimum,
+                  sqrtPriceLimitX96: sqrtPriceLimitX96,
+                }
               ],
             };
           },
@@ -180,24 +194,41 @@ export default function BridgeAndExecuteTest({
         recipient: (formData.recipient || address) as `0x${string}`,
         execute: {
           contractAddress: formData.contractAddress as `0x${string}`,
-          contractAbi: [
-            {
-              inputs: [
-                { internalType: 'uint256', name: 'assets', type: 'uint256' },
-                { internalType: 'address', name: 'receiver', type: 'address' },
-              ],
-              name: 'deposit',
-              outputs: [{ internalType: 'uint256', name: 'shares', type: 'uint256' }],
-              stateMutability: 'nonpayable',
-              type: 'function',
-            },
-          ],
+          contractAbi: UNISWAP_V3_SWAP_ROUTER_ABI,
           functionName: formData.functionName,
           buildFunctionParams: (_token, amount, _chainId, userAddress) => {
+            const tokenIn = "0x07865c6e87b9f70255377e024ace6630c1eaa37f" // USDC address on Ethereum Sepolia
             const decimals = 6; // USDC decimals
-            const amountWei = BigInt(parseFloat(amount) * 10 ** decimals);
+            const amountWei = parseFloat(amount) * 10 ** decimals;
+            const tokenOut = "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0" // USDT address on Ethereum Sepolia
+            const fee = 3000;
+            const recipient = (formData.recipient || address) as `0x${string}`;
+            const amountOutMinimum = parseFloat(amount) * 1 ** decimals;
+            const sqrtPriceLimitX96: 0 = 0;
+            
+            console.log({
+              functionParams: [
+                tokenIn,
+                tokenOut,
+                fee,
+                recipient,
+                amountWei,
+                amountOutMinimum,
+                sqrtPriceLimitX96,
+              ],
+            });
             return {
-              functionParams: [amountWei, userAddress],
+              functionParams: [
+                {
+                  tokenIn: tokenIn,
+                  tokenOut: tokenOut,
+                  fee: fee,
+                  recipient: recipient,
+                  amountIn: amountWei,
+                  amountOutMinimum: amountOutMinimum,
+                  sqrtPriceLimitX96: sqrtPriceLimitX96,
+                }
+              ],
             };
           },
           tokenApproval: {
